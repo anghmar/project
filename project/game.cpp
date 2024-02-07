@@ -1,5 +1,6 @@
 #include <SDL.h>
-#include "game.h"
+#include "Game.h"
+#include "Actor.h"
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
@@ -215,3 +216,34 @@ void Game::GenerateOutput() {
     // Present the renderer
     SDL_RenderPresent(mRenderer);
 }
+
+void Game::AddActor(Actor* actor)
+{
+    //if updating actors, need to ass to pending
+    if (mUpdatingActors)
+    {
+        mPendingActors.emplace_back(actor);
+    }
+    else
+    {
+        mActors.emplace_back(actor);
+    }
+    
+};
+
+void Game::RemoveActor(Actor* actor)
+{
+    // Find the actor in the mActors vector
+    auto it = std::find(mActors.begin(), mActors.end(), actor);
+    auto it2 = std::find(mPendingActors.begin(), mPendingActors.end(), actor);
+
+    // If the actor is found, remove it from the vector
+    if (it != mActors.end())
+    {
+        mActors.erase(it);
+    }
+    if (it2 != mPendingActors.end())
+    {
+        mPendingActors.erase(it2);
+    }
+};

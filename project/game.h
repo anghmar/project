@@ -2,6 +2,8 @@
 
 #include <SDL.h>
 #include <iostream>
+#include <vector>
+
 
 const int thickness = 15;
 const int paddleH = thickness * 8;
@@ -23,6 +25,9 @@ private:
     void ProcessInput();
     void UpdateGame();
     void GenerateOutput();
+    void AddActor(Actor* actor);
+    void RemoveActor(Actor* actor);
+
     bool mIsRunning;
     Uint32 mTicksCount;
     int mPaddleDir;
@@ -31,4 +36,7 @@ private:
     Vector2 mPaddlePos;
     Vector2 mBallPos;
     Vector2 mBallVel;
+    bool mUpdatingActors;
+    std::vector<class Actor*> mActors;
+    std::vector<class Actor*> mPendingActors;
 };

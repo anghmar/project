@@ -139,7 +139,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h" />
-    <ClInclude Include="game.h" />
+    <ClInclude Include="Component.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="GameObject.h" />
   </ItemGroup>
   <ItemGroup>

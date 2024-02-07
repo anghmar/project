@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "game.h"
+#include "Game.h"
 
 class Actor
 {
