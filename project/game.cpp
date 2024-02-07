@@ -1,6 +1,8 @@
 #include <SDL.h>
 #include "game.h"
 #include <iostream>
+#include <stdlib.h>
+#include <time.h>
 
 
 
@@ -43,6 +45,9 @@ Game::Game() {
 
     mBallPos.x = 1024 / 2;
     mBallPos.y = 768 / 2;
+
+    mBallVel.x = 50.0f;
+    mBallVel.y = -50.0f;
 
     mTicksCount = 0;
 }
@@ -122,6 +127,36 @@ void Game::UpdateGame() {
         }
     }
 
+    mBallPos.x += mBallVel.x * deltaTime;
+    mBallPos.y += mBallVel.y * deltaTime;
+
+    if (mBallPos.y <= thickness && mBallVel.y < 0.0f)
+    {
+        mBallVel.y *= -1;
+    }
+    if (mBallPos.x >= 1024 - thickness)
+    {
+        mBallVel.x *= -1;
+    }
+    if (mBallPos.y >= 768 - thickness)
+    {
+        mBallVel.y *= -1;
+    }
+
+    //std::cout << "X: " << mBallPos.x << " Y: " << mBallPos.y << std::endl;
+
+    if (
+        // Our y-difference is small enough
+        abs(mBallPos.y - mPaddlePos.y) <= paddleH / 2.0f &&
+        // Ball is at the correct x-position
+        mBallPos.x <= 30.0f && mBallPos.x >= 15.0f &&
+        // The ball is moving to the left
+        mBallVel.x < 0.0f)
+    {
+        mBallVel.x *= -1.0f;
+    }
+
+
     // Update tick counts (for next frame)
     // mTicksCount = SDL_GetTicks();
 }
@@ -142,9 +177,16 @@ void Game::GenerateOutput() {
 
     SDL_Rect wall2{
         0, // Top left x
-        768 - 15, // Top left y
+        768 - thickness, // Top left y
         1024, // Width
         55 // Height
+    };
+
+    SDL_Rect wall3{
+        1024 - thickness, // Top left x
+        0, // Top left y
+        thickness, // Width
+        768 // Height
     };
 
     SDL_Rect paddle{
@@ -166,6 +208,7 @@ void Game::GenerateOutput() {
     SDL_SetRenderDrawColor(mRenderer, 192, 192, 192, 255);
     SDL_RenderFillRect(mRenderer, &wall);
     SDL_RenderFillRect(mRenderer, &wall2);
+    SDL_RenderFillRect(mRenderer, &wall3);
 
     SDL_RenderFillRect(mRenderer, &ball);
     SDL_RenderFillRect(mRenderer, &paddle);

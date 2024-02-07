@@ -30,4 +30,5 @@ private:
     SDL_Renderer* mRenderer;
     Vector2 mPaddlePos;
     Vector2 mBallPos;
+    Vector2 mBallVel;
 };
