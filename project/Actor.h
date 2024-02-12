@@ -20,9 +20,16 @@ public:
 	virtual void UpdateActor(float deltaTime);
 
 	//getters
-	// TODO
+	class Game* GetGame() { return mGame; }
+	State GetState() { return mState; }
+	const Vector2& GetPosition() const { return mPosition; }
+	float GetScale() const { return mScale; }
+	float GetRotation() const { return mRotation; }
 	//setters
-	// TODO
+	void SetPosition(const Vector2& pos) { mPosition = pos; }
+	void SetScale(float scale) { mScale = scale; }
+	void SetRotation(float rotation) { mRotation = rotation; }
+	void SetState(State state) { mState = state; }
 
 	void AddComponent(class Component* component);
 	void RemoveComponent(class Component* component);

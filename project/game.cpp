@@ -1,10 +1,12 @@
 #include <SDL.h>
 #include "Game.h"
+#include "SpriteComponent.h"
 #include "Actor.h"
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
-
+#include <algorithm>
+#include <SDL_image.h>
 
 
 bool Game::Initialize()
@@ -14,6 +16,14 @@ bool Game::Initialize()
         SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
         return false;
     }
+
+    if (IMG_Init(IMG_INIT_PNG) == 0)
+    {
+        SDL_Log("Unable to initialize SDL_image: %s", SDL_GetError());
+        return false;
+    }
+
+    SDL_Surface* IMG_Load(const char* file);
 
     mWindow = SDL_CreateWindow(
         "Game Programming in C++ (Chapter 1)", // Window title
@@ -109,10 +119,45 @@ void Game::UpdateGame() {
     float deltaTime = (SDL_GetTicks() - mTicksCount) / 1000.0f;
 
     // Clamp maximum delta time value
-    if (deltaTime > 0.05f)
+    /*if (deltaTime > 0.05f)
     {
         deltaTime = 0.05f;
+    }*/
+
+    // Update all actors
+    mUpdatingActors = true;
+    for (auto actor : mActors)
+    {
+        actor->Update(deltaTime);
     }
+
+    mUpdatingActors = false;
+
+    // Move any pending actors to mActors
+    for (auto pending : mPendingActors)
+    {
+        mActors.emplace_back(pending);
+    }
+    mPendingActors.clear();
+
+    // Add any dead actors to a temp vector
+    std::vector<Actor*> deadActors;
+
+    for (auto actor : mActors)
+    {
+        if (actor->GetState() == Actor::EDead)
+        {
+            deadActors.emplace_back(actor);
+        }
+    }
+
+    // Delete dead actors (removes them frmo mActors)
+    for (auto actor : deadActors)
+    {
+        delete actor;
+    }
+
+
 
     if (mPaddleDir != 0)
     {
@@ -233,17 +278,39 @@ void Game::AddActor(Actor* actor)
 
 void Game::RemoveActor(Actor* actor)
 {
-    // Find the actor in the mActors vector
-    auto it = std::find(mActors.begin(), mActors.end(), actor);
-    auto it2 = std::find(mPendingActors.begin(), mPendingActors.end(), actor);
+    // Is it in pending actors?
+    auto iter = std::find(mPendingActors.begin(), mPendingActors.end(), actor);
+    if (iter != mPendingActors.end())
+    {
+        // Swap to end of vector and pop off (avoid erase copies)
+        std::iter_swap(iter, mPendingActors.end() - 1);
+        mPendingActors.pop_back();
+    }
 
-    // If the actor is found, remove it from the vector
-    if (it != mActors.end())
+    // Is it in actors?
+    iter = std::find(mActors.begin(), mActors.end(), actor);
+    if (iter != mActors.end())
     {
-        mActors.erase(it);
+        // Swap to end of vector and pop off (avoid erase copies)
+        std::iter_swap(iter, mActors.end() - 1);
+        mActors.pop_back();
     }
-    if (it2 != mPendingActors.end())
+}
+
+void Game::AddSprite(SpriteComponent* sprite)
+{
+    int myDrawOrder = sprite->GetDrawOrder();
+    auto iter = mSprites.begin();
+
+    for (; iter != mSprites.end(); ++iter)
     {
-        mPendingActors.erase(it2);
+        if (myDrawOrder < (*iter)->GetDrawOrder())
+        {
+            break;
+        }
     }
-};
+
+    // Inserts element before position of iterator
+    mSprites.insert(iter, sprite);
+
+}
