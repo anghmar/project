@@ -1,1 +1,2 @@
-ended at 48 before Animating Sprites
+Completely changed multiple animation system..
+Je treba to trosku upravit u kno

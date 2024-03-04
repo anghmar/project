@@ -2,30 +2,61 @@
 #include "Math.h"
 
 AnimSpriteComponent::AnimSpriteComponent(Actor* owner, int drawOrder)
-	:SpriteComponent(owner, drawOrder)
-	, mCurrFrame(0.0f)
-	, mAnimFPS(24.0f)
+	:SpriteComponent(owner, drawOrder),
+	mCurrentAnimationIndex(0),
+	mCurrFrame(0.0f),
+	mAnimFPS(24.0f),
+	mIsPlaying(true)
+	//currentAnimation(nullptr)
+	//currentAnimation(mAnimations[mCurrentAnimationIndex])
 {
 }
 
 void AnimSpriteComponent::Update(float deltaTime)
 {
-	SpriteComponent::Update(deltaTime);
+	//SpriteComponent::Update(deltaTime);
 
-	if (mAnimTextures.size() > 0)
-	{
-		//Update the current frame based on frame rate and delta time
-		mCurrFrame += mAnimFPS * deltaTime;
+	//if (mIsPlaying && !mAnimations.empty())
+	//{
+	//	Animation& currentAnimation = mAnimations[mCurrentAnimationIndex];
 
-		//Wrap current frame if needed
-		while (mCurrFrame >= mAnimTextures.size())
-		{
-			mCurrFrame -= mAnimTextures.size();
-		}
+	//	//Update the current frame based on frame rate and delta time
+	//	mCurrFrame += mAnimFPS * deltaTime;
 
-		//Set the current texture
-		SetTexture(mAnimTextures[static_cast<int>(mCurrFrame)]);
-	}
+	//	if (currentAnimation.looping)
+	//	{
+	//		while (mCurrFrame >= currentAnimation.endIndex)
+	//		{
+	//			mCurrFrame -= currentAnimation.endIndex;
+	//		}
+	//	}
+	//	else
+	//	{
+	//		// Stop Animation if it reaches the end
+	//		if (mCurrFrame >= currentAnimation.endIndex)
+	//		{
+	//			mIsPlaying = false;
+	//			mCurrFrame = currentAnimation.endIndex - 1;
+	//		}
+	//	}
+
+	//	SetTexture(currentAnimation.textures[static_cast<int>(mCurrFrame)]);
+	//}
+
+	//if (mAnimTextures.size() > 0)
+	//{
+	//	//Update the current frame based on frame rate and delta time
+	//	mCurrFrame += mAnimFPS * deltaTime;
+
+	//	//Wrap current frame if needed
+	//	while (mCurrFrame >= mAnimTextures.size())
+	//	{
+	//		mCurrFrame -= mAnimTextures.size();
+	//	}
+
+	//	//Set the current texture
+	//	SetTexture(mAnimTextures[static_cast<int>(mCurrFrame)]);
+	//}
 }
 
 void AnimSpriteComponent::SetAnimTextures(const std::vector<SDL_Texture*>& textures)
@@ -37,4 +68,35 @@ void AnimSpriteComponent::SetAnimTextures(const std::vector<SDL_Texture*>& textu
 		mCurrFrame = 0.0f;
 		SetTexture(mAnimTextures[0]);
 	}
+}
+
+void AnimSpriteComponent::SetAnimations(const std::vector<Animation>& animations)
+{
+	mAnimations = animations;
+
+	if (!mAnimations.empty())
+	{
+		mCurrentAnimationIndex = 0;
+		mCurrFrame = 0.0f;
+		SetTexture(mAnimations[mCurrentAnimationIndex].textures[0]);
+	}
+}
+
+void AnimSpriteComponent::SetCurrentAnimation(int animationIndex)
+{
+	if (animationIndex >= 0 && animationIndex < mAnimations.size())
+	{
+		mCurrentAnimationIndex = animationIndex;
+		mCurrFrame = 0.0f;
+		mIsPlaying = true;
+
+		SetTexture(mAnimations[mCurrentAnimationIndex].textures[0]);
+	}
+}
+
+void AnimSpriteComponent::SetCurrentAnimationManual(int frameIndex, int animationIndex)
+{
+	mCurrFrame = 0.0f;
+	mIsPlaying = true;
+	SetTexture(mAnimations[animationIndex].textures[frameIndex]);
 }

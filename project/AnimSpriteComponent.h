@@ -5,20 +5,39 @@
 class AnimSpriteComponent : public SpriteComponent
 {
 public:
+
+	struct Animation
+	{
+		std::vector<SDL_Texture*> textures;
+		int endIndex;
+		bool looping;
+
+		Animation(const std::vector<SDL_Texture*>& _textures, int _endIndex, bool _looping)
+			: textures(_textures), endIndex(_endIndex), looping(_looping) {}
+	};
+
 	AnimSpriteComponent(class Actor* owner, int drawOrder = 100);
 	//Update animation every frame (override from component)
 	void Update(float deltaTime) override;
-	//Set textures used for animation
 	void SetAnimTextures(const std::vector<SDL_Texture*>& textures);
-	//Set/Get the animation FPS
+	void SetCurrentAnimationManual(int frameIndex, int animationIndex);
+
+
+	void SetAnimations(const std::vector<Animation>& animations);
+	void SetCurrentAnimation(int animationIndex);
 	float GetAnimFPS() const { return mAnimFPS; }
 	void SetAnimFPS(float fps) { mAnimFPS = fps; }
+	//bool isAnimationLooping() { return currentAnimation.looping; }
+	bool isAnimationPlaying() { return mIsPlaying; }
 
 private:
 	//All textures in the animation
-	std::vector<SDL_Texture*> mAnimTextures;
-	//Current frame displayed
+	std::vector<SDL_Texture*> mAnimTextures; //it will probably get deleted..
+
+	std::vector<Animation> mAnimations;
+	//Animation& currentAnimation;
+	int mCurrentAnimationIndex;
 	float mCurrFrame;
-	//Animation Frame Rate
 	float mAnimFPS;
+	bool mIsPlaying;
 };
