@@ -1,53 +1,50 @@
 #pragma once
-
-#include <SDL.h>
-#include <iostream>
-#include <vector>
+#include "SDL.h"
 #include <unordered_map>
-
-const int thickness = 15;
-const int paddleH = thickness * 8;
-
-struct Vector2
-{
-    float x;
-    float y;
-};
+#include <string>
+#include <vector>
 
 class Game
 {
 public:
-    Game();
-    bool Initialize();
-    void RunLoop();
-    void Shutdown();
+	Game();
+	bool Initialize();
+	void RunLoop();
+	void Shutdown();
 
-    void AddActor(Actor* actor);
-    void RemoveActor(Actor* actor);
+	void AddActor(class Actor* actor);
+	void RemoveActor(class Actor* actor);
 
-    void AddSprite(class SpriteComponent* sprite);
-    void RemoveSprite(class SpriteComponent* sprite);
+	void AddSprite(class SpriteComponent* sprite);
+	void RemoveSprite(class SpriteComponent* sprite);
+
+	SDL_Texture* GetTexture(const std::string& fileName);
 private:
-    void ProcessInput();
-    void UpdateGame();
-    void GenerateOutput();
+	void ProcessInput();
+	void UpdateGame();
+	void GenerateOutput();
+	void LoadData();
+	void UnloadData();
 
-    void LoadData();
-    void UnloadData();
+	// Map of textures loaded
+	std::unordered_map<std::string, SDL_Texture*> mTextures;
 
-    bool mIsRunning;
-    Uint32 mTicksCount;
-    int mPaddleDir;
-    SDL_Window* mWindow;
-    SDL_Renderer* mRenderer;
-    Vector2 mPaddlePos;
-    Vector2 mBallPos;
-    Vector2 mBallVel;
-    bool mUpdatingActors;
+	// All the actors in the game
+	std::vector<class Actor*> mActors;
+	// Any pending actors
+	std::vector<class Actor*> mPendingActors;
 
-    std::unordered_map<std::string, SDL_Texture*> mTextures;
+	// All the sprite components drawn
+	std::vector<class SpriteComponent*> mSprites;
 
-    std::vector<class Actor*> mActors;
-    std::vector<class Actor*> mPendingActors;
-    std::vector<class SpriteComponent*> mSprites;
+	SDL_Window* mWindow;
+	SDL_Renderer* mRenderer;
+	Uint32 mTicksCount;
+	bool mIsRunning;
+	// Track if we're updating actors right now
+	bool mUpdatingActors;
+
+	// Game-specific Game-specific Game-specific Game-specific Game-specific
+	 
+	class Ship* mShip; // Player's ship
 };
