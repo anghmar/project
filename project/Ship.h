@@ -14,6 +14,7 @@ private:
 	float mRightSpeed;
 	float mDownSpeed;
 	int CurrentFrameWalk;
+	int CurrentFrameJump;
 	AnimSpriteComponent* mAnimSpriteComponent;
 
 };

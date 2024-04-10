@@ -99,7 +99,8 @@ void Ship::ProcessKeyboard(const uint8_t* state)
 	mRightSpeed = 0.0f;
 	mDownSpeed = 0.0f;
 
-	CurrentFrameWalk += 24 * 0.05f;
+	CurrentFrameWalk += 1;
+	CurrentFrameJump += 1;
 	//int CurrentFrame = 0;
 	// right/left
 	if (state[SDL_SCANCODE_D])
@@ -110,7 +111,7 @@ void Ship::ProcessKeyboard(const uint8_t* state)
 		}
 		mRightSpeed += 250.0f;
 		mAnimSpriteComponent->SetCurrentAnimationManual(static_cast<int>(CurrentFrameWalk), 1);
-		std::cout << CurrentFrameWalk << std::endl;
+		std::cout << "CurrentFrameWalk" << CurrentFrameWalk << std::endl;
 		//CurrentFrameWalk++;
 	}
 	else if (state[SDL_SCANCODE_A])
@@ -123,11 +124,6 @@ void Ship::ProcessKeyboard(const uint8_t* state)
 		mAnimSpriteComponent->SetCurrentAnimationManual(static_cast<int>(CurrentFrameWalk), 1);
 		//CurrentFrameWalk++;
 	}
-	//else
-	//{
-	//	// If neither A nor D is pressed, stop the animation
-	//	mAnimSpriteComponent->SetCurrentAnimation(0);
-	//}
 	// up/down
 	if (state[SDL_SCANCODE_S])
 	{
@@ -137,7 +133,17 @@ void Ship::ProcessKeyboard(const uint8_t* state)
 	if (state[SDL_SCANCODE_W])
 	{
 		//mDownSpeed -= 300.0f;
-		mAnimSpriteComponent->SetCurrentAnimation(2);
+
+		if (CurrentFrameJump >= 9)
+		{
+			CurrentFrameJump = 0;
+		}
+		//mRightSpeed += 250.0f;
+		mAnimSpriteComponent->SetCurrentAnimationManual(static_cast<int>(CurrentFrameJump), 2);
+		std::cout << "CurrentFrameJump" << CurrentFrameJump << std::endl;
+		//CurrentFrameWalk++;
+
+		//mAnimSpriteComponent->SetCurrentAnimation(2);
 	}
 	//if (!state[SDL_SCANCODE_D] && !state[SDL_SCANCODE_A] && !state[SDL_SCANCODE_S] && !state[SDL_SCANCODE_W])
 	//{
