@@ -1,12 +1,13 @@
 #include "Game.h"
+#include <GL/glew.h>
 #include "SDL_image.h"
 #include <algorithm>
 #include "Actor.h"
 #include "SpriteComponent.h"
 #include "Ship.h"
-#include "BGSpriteComponent.h"
-#include <SDL_image.h>
-#include <iostream>
+#include "Asteroid.h"
+#include "Random.h"
+
 
 Game::Game()
 	:mWindow(nullptr)
@@ -25,7 +26,24 @@ bool Game::Initialize()
 		return false;
 	}
 
-	mWindow = SDL_CreateWindow("Game Programming in C++ (Chapter 2)", 100, 100, 1024, 768, 0);
+	// Set OpenGL attributes
+	// Use the core OpenGL profile
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	// Specify version 3.3
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+	// Request a color buffer with 8-bits per RGBA channel
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+	// Enable double buffering
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	// Force OpenGL to use hardware acceleration
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+
+	//Changed from SDL window to OpenGL window
+	mWindow = SDL_CreateWindow("OPENGL", 100, 100, 1024, 768, SDL_WINDOW_OPENGL);
 	if (!mWindow)
 	{
 		SDL_Log("Failed to create window: %s", SDL_GetError());
@@ -39,11 +57,27 @@ bool Game::Initialize()
 		return false;
 	}
 
+	mContext = SDL_GL_CreateContext(mWindow);
+
+	// Initialize GLEW
+	glewExperimental = GL_TRUE;
+
+	if (glewInit() != GLEW_OK) {
+		SDL_Log("Failed to init GLEW.");
+		return false;
+	}
+
+	//On some platforms, GLEW will emit a error code
+	glGetError();
+
+
 	if (IMG_Init(IMG_INIT_PNG) == 0)
 	{
 		SDL_Log("Unable to initialize SDL_image: %s", SDL_GetError());
 		return false;
 	}
+
+	Random::Init();
 
 	LoadData();
 
@@ -51,8 +85,6 @@ bool Game::Initialize()
 
 	return true;
 }
-
-
 
 void Game::RunLoop()
 {
@@ -77,14 +109,18 @@ void Game::ProcessInput()
 		}
 	}
 
-	const Uint8* state = SDL_GetKeyboardState(NULL);
-	if (state[SDL_SCANCODE_ESCAPE])
+	const Uint8* keyState = SDL_GetKeyboardState(NULL);
+	if (keyState[SDL_SCANCODE_ESCAPE])
 	{
 		mIsRunning = false;
 	}
 
-	// Process ship input
-	mShip->ProcessKeyboard(state);
+	mUpdatingActors = true;
+	for (auto actor : mActors)
+	{
+		actor->ProcessInput(keyState);
+	}
+	mUpdatingActors = false;
 }
 
 void Game::UpdateGame()
@@ -135,8 +171,20 @@ void Game::UpdateGame()
 
 void Game::GenerateOutput()
 {
-	SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
-	SDL_RenderClear(mRenderer);
+	// SDL Window INIT
+	//SDL_SetRenderDrawColor(mRenderer, 120, 220, 220, 255);
+	//SDL_RenderClear(mRenderer);
+
+	//Set the clear color to gray
+	glClearColor(0.86f, 0.86f, 0.86f, 1.0f);
+	//Clear color buffer
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	//TODO: Draw the scene
+
+	//Swap the buffers which also displays the scene
+	SDL_GL_SwapWindow(mWindow);
+
 
 	// Draw all sprite components
 	for (auto sprite : mSprites)
@@ -151,32 +199,15 @@ void Game::LoadData()
 {
 	// Create player's ship
 	mShip = new Ship(this);
-	mShip->SetPosition(Vector2(100.0f, 384.0f));
-	mShip->SetScale(2.0f);
+	mShip->SetPosition(Vector2(512.0f, 384.0f));
+	mShip->SetRotation(Math::PiOver2);
 
-	// Create actor for the background (this doesn't need a subclass)
-	Actor* temp = new Actor(this);
-	temp->SetPosition(Vector2(512.0f, 384.0f));
-	// Create the "far back" background
-	BGSpriteComponent* bg = new BGSpriteComponent(temp);
-	bg->SetScreenSize(Vector2(1024.0f, 768.0f));
-	std::vector<SDL_Texture*> bgtexs = {
-		GetTexture("Assets/Farback01.png"),
-		GetTexture("Assets/Farback02.png")
-	};
-	bg->SetBGTextures(bgtexs);
-	bg->SetScrollSpeed(-100.0f);
-	// Create the closer background
-	bg = new BGSpriteComponent(temp, 50);
-	bg->SetScreenSize(Vector2(1024.0f, 768.0f));
-	bgtexs = {
-		GetTexture("Assets/Stars.png"),
-		GetTexture("Assets/Stars.png")
-	};
-	bg->SetBGTextures(bgtexs);
-	bg->SetScrollSpeed(5.0f);
-
-	std::cout << mShip->GetRightSpeed() << std::endl;
+	// Create asteroids
+	const int numAsteroids = 50;
+	for (int i = 0; i < numAsteroids; i++)
+	{
+		new Asteroid(this);
+	}
 }
 
 void Game::UnloadData()
@@ -229,11 +260,27 @@ SDL_Texture* Game::GetTexture(const std::string& fileName)
 	return tex;
 }
 
+void Game::AddAsteroid(Asteroid* ast)
+{
+	mAsteroids.emplace_back(ast);
+}
+
+void Game::RemoveAsteroid(Asteroid* ast)
+{
+	auto iter = std::find(mAsteroids.begin(),
+		mAsteroids.end(), ast);
+	if (iter != mAsteroids.end())
+	{
+		mAsteroids.erase(iter);
+	}
+}
+
 void Game::Shutdown()
 {
 	UnloadData();
 	IMG_Quit();
 	SDL_DestroyRenderer(mRenderer);
+	SDL_GL_DeleteContext(mContext);
 	SDL_DestroyWindow(mWindow);
 	SDL_Quit();
 }

@@ -19,6 +19,12 @@ public:
 	void RemoveSprite(class SpriteComponent* sprite);
 
 	SDL_Texture* GetTexture(const std::string& fileName);
+
+	// Game-specific (add/remove asteroid)
+	void AddAsteroid(class Asteroid* ast);
+	void RemoveAsteroid(class Asteroid* ast);
+	std::vector<class Asteroid*>& GetAsteroids() { return mAsteroids; }
+private:
 private:
 	void ProcessInput();
 	void UpdateGame();
@@ -44,7 +50,11 @@ private:
 	// Track if we're updating actors right now
 	bool mUpdatingActors;
 
+	// Context contains every item that OpenGL knows about (color buffer, image or model loaded)
+	SDL_GLContext mContext;
+
 	// Game-specific Game-specific Game-specific Game-specific Game-specific
 	 
 	class Ship* mShip; // Player's ship
+	std::vector<class Asteroid*> mAsteroids;
 };
