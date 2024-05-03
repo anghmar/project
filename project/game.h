@@ -32,6 +32,9 @@ private:
 	void LoadData();
 	void UnloadData();
 
+	void CreateSpriteVerts();
+	bool LoadShaders();
+
 	// Map of textures loaded
 	std::unordered_map<std::string, SDL_Texture*> mTextures;
 
@@ -49,6 +52,12 @@ private:
 	bool mIsRunning;
 	// Track if we're updating actors right now
 	bool mUpdatingActors;
+
+
+	// Sprite shader
+	class Shader* mSpriteShader;
+	// Sprite vertex array
+	class VertexArray* mSpriteVerts;
 
 	// Context contains every item that OpenGL knows about (color buffer, image or model loaded)
 	SDL_GLContext mContext;

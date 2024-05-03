@@ -5,8 +5,10 @@
 #include "Actor.h"
 #include "SpriteComponent.h"
 #include "Ship.h"
+#include "VertexArray.h"
 #include "Asteroid.h"
 #include "Random.h"
+#include "Shader.h"
 
 
 Game::Game()
@@ -42,42 +44,38 @@ bool Game::Initialize()
 	// Force OpenGL to use hardware acceleration
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
-	//Changed from SDL window to OpenGL window
-	mWindow = SDL_CreateWindow("OPENGL", 100, 100, 1024, 768, SDL_WINDOW_OPENGL);
+	mWindow = SDL_CreateWindow("Game Programming in C++ (Chapter 5)", 100, 100,
+		1024, 768, SDL_WINDOW_OPENGL);
 	if (!mWindow)
 	{
 		SDL_Log("Failed to create window: %s", SDL_GetError());
 		return false;
 	}
 
-	mRenderer = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if (!mRenderer)
-	{
-		SDL_Log("Failed to create renderer: %s", SDL_GetError());
-		return false;
-	}
-
+	// Create an OpenGL context
 	mContext = SDL_GL_CreateContext(mWindow);
 
 	// Initialize GLEW
 	glewExperimental = GL_TRUE;
-
-	if (glewInit() != GLEW_OK) {
-		SDL_Log("Failed to init GLEW.");
+	if (glewInit() != GLEW_OK)
+	{
+		SDL_Log("Failed to initialize GLEW.");
 		return false;
 	}
 
-	//On some platforms, GLEW will emit a error code
+	// On some platforms, GLEW will emit a benign error code,
+	// so clear it
 	glGetError();
 
-
-	if (IMG_Init(IMG_INIT_PNG) == 0)
+	// Make sure we can create/compile shaders
+	if (!LoadShaders())
 	{
-		SDL_Log("Unable to initialize SDL_image: %s", SDL_GetError());
+		SDL_Log("Failed to load shaders.");
 		return false;
 	}
 
-	Random::Init();
+	// Create quad for drawing sprites
+	CreateSpriteVerts();
 
 	LoadData();
 
@@ -148,6 +146,7 @@ void Game::UpdateGame()
 	// Move any pending actors to mActors
 	for (auto pending : mPendingActors)
 	{
+		pending->ComputeWorldTransform();
 		mActors.emplace_back(pending);
 	}
 	mPendingActors.clear();
@@ -171,28 +170,23 @@ void Game::UpdateGame()
 
 void Game::GenerateOutput()
 {
-	// SDL Window INIT
-	//SDL_SetRenderDrawColor(mRenderer, 120, 220, 220, 255);
-	//SDL_RenderClear(mRenderer);
-
 	//Set the clear color to gray
 	glClearColor(0.86f, 0.86f, 0.86f, 1.0f);
 	//Clear color buffer
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	//TODO: Draw the scene
-
-	//Swap the buffers which also displays the scene
-	SDL_GL_SwapWindow(mWindow);
-
+	// Set sprite shader and vertex array objects active
+	mSpriteShader->SetActive();
+	mSpriteVerts->SetActive();
 
 	// Draw all sprite components
 	for (auto sprite : mSprites)
 	{
-		sprite->Draw(mRenderer);
+		sprite->Draw(mSpriteShader);
 	}
 
-	SDL_RenderPresent(mRenderer);
+	//Swap the buffers which also displays the scene
+	SDL_GL_SwapWindow(mWindow);
 }
 
 void Game::LoadData()
@@ -275,6 +269,23 @@ void Game::RemoveAsteroid(Asteroid* ast)
 	}
 }
 
+void Game::CreateSpriteVerts()
+{
+	float vertices[] = {
+		-0.5f,  0.5f, 0.f, 0.f, 0.f, // top left
+		 0.5f,  0.5f, 0.f, 0.f, 0.f, // top right
+		 0.5f, -0.5f, 0.f, 0.f, 0.f, // bottom right
+		-0.5f, -0.5f, 0.f, 0.f, 0.f  // bottom left
+	};
+
+	unsigned int indices[] = {
+		0, 1, 2,
+		2, 3, 0
+	};
+
+	mSpriteVerts = new VertexArray(vertices, 4, indices, 6);
+}
+
 void Game::Shutdown()
 {
 	UnloadData();
@@ -337,6 +348,16 @@ void Game::AddSprite(SpriteComponent* sprite)
 
 	// Inserts element before position of iterator
 	mSprites.insert(iter, sprite);
+}
+
+bool Game::LoadShaders()
+{
+	mSpriteShader = new Shader();
+	if (!mSpriteShader->Load("Basic.vert", "Basic.frag"))
+	{
+		return false;
+	}
+	mSpriteShader->SetActive();
 }
 
 void Game::RemoveSprite(SpriteComponent* sprite)

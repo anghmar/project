@@ -28,8 +28,12 @@ void Actor::Update(float deltaTime)
 {
 	if (mState == EActive)
 	{
+		ComputeWorldTransform();
+
 		UpdateComponents(deltaTime);
 		UpdateActor(deltaTime);
+
+		ComputeWorldTransform();
 	}
 }
 
@@ -61,6 +65,24 @@ void Actor::ProcessInput(const uint8_t* keyState)
 
 void Actor::ActorInput(const uint8_t* keyState)
 {
+}
+
+void Actor::ComputeWorldTransform()
+{
+	if (mRecomputeWorldTransform)
+	{
+		mRecomputeWorldTransform = false;
+		// SCALE > ROTATE > TRANSLATE // THIS ORDER IS NECESSARY!!!
+		mWorldTransform = Matrix4::CreateScale(mScale);
+		mWorldTransform *= Matrix4::CreateRotationZ(mRotation);
+		mWorldTransform *= Matrix4::CreateTranslation(Vector3(mPosition.x, mPosition.y, 0.0f));
+
+		// Inform components world transform update
+		for (auto comp : mComponents)
+		{
+			comp->OnUpdateWorldTransform();
+		}
+	}
 }
 
 void Actor::AddComponent(Component* component)

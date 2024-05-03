@@ -14,6 +14,8 @@ public:
 	// Process input for this component
 	virtual void ProcessInput(const uint8_t* keyState) {}
 
+	virtual void OnUpdateWorldTransform() {}
+
 	int GetUpdateOrder() const { return mUpdateOrder; }
 protected:
 	// Owning actor

@@ -43,6 +43,8 @@ public:
 
 	class Game* GetGame() { return mGame; }
 
+	//OPENGL news
+	void ComputeWorldTransform();
 
 	// Add/remove components
 	void AddComponent(class Component* component);
@@ -55,6 +57,10 @@ private:
 	Vector2 mPosition;
 	float mScale;
 	float mRotation;
+
+	//OPENGL Transform
+	Matrix4 mWorldTransform;
+	bool mRecomputeWorldTransform;
 
 	std::vector<class Component*> mComponents;
 	class Game* mGame;
