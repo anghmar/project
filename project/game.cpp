@@ -353,7 +353,7 @@ void Game::AddSprite(SpriteComponent* sprite)
 bool Game::LoadShaders()
 {
 	mSpriteShader = new Shader();
-	if (!mSpriteShader->Load("Basic.vert", "Basic.frag"))
+	if (!mSpriteShader->Load("Shaders/Basic.vert", "Shaders/Basic.frag"))
 	{
 		return false;
 	}
