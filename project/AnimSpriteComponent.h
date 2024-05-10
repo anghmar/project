@@ -21,6 +21,7 @@ public:
 	void Update(float deltaTime) override;
 	void SetAnimTextures(const std::vector<SDL_Texture*>& textures);
 	void SetCurrentAnimationManual(int frameIndex, int animationIndex);
+	void SetCurrentAnimationLoop(AnimSpriteComponent* sprite, int animationIndex, int endIndex);
 
 
 	void SetAnimations(const std::vector<Animation>& animations);
@@ -29,6 +30,8 @@ public:
 	void SetAnimFPS(float fps) { mAnimFPS = fps; }
 	//bool isAnimationLooping() { return currentAnimation.looping; }
 	bool isAnimationPlaying() { return mIsPlaying; }
+	bool GetLockControl() { return lockControl; }
+	void SetLockControl(bool lock) { lockControl = lock; }
 
 private:
 	//All textures in the animation
@@ -40,4 +43,5 @@ private:
 	float mCurrFrame;
 	float mAnimFPS;
 	bool mIsPlaying;
+	bool lockControl = true;
 };
