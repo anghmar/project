@@ -172,6 +172,7 @@
     <ClInclude Include="VertexArray.h" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="CMakeLists.txt" />
     <Text Include="info.txt" />
   </ItemGroup>
   <ItemGroup>
