@@ -31,43 +31,10 @@ void Ship::ActorInput(const uint8_t* keyState)
 {
 	if (keyState[SDL_SCANCODE_SPACE] && mLaserCooldown <= 0.0f)
 	{
-		if (CurrentFrameWalk >= 6)
-		{
-			CurrentFrameWalk = 0;
-		}
-		mRightSpeed += 250.0f;
-		mAnimSpriteComponent->SetCurrentAnimationManual(static_cast<int>(CurrentFrameWalk), 1);
-		std::cout << "CurrentFrameWalk" << CurrentFrameWalk << std::endl;
-		//CurrentFrameWalk++;
-	}
-	else if (state[SDL_SCANCODE_A])
-	{
-		if (CurrentFrameWalk >= 6)
-		{
-			CurrentFrameWalk = 0;
-		}
-		mRightSpeed -= 250.0f;
-		mAnimSpriteComponent->SetCurrentAnimationManual(static_cast<int>(CurrentFrameWalk), 1);
-		//CurrentFrameWalk++;
-	}
-	// up/down
-	if (state[SDL_SCANCODE_S])
-	{
-		//mDownSpeed += 300.0f;
-		mAnimSpriteComponent->SetCurrentAnimation(3);
-	}
-	if (state[SDL_SCANCODE_W])
-	{
-		//mDownSpeed -= 300.0f;
-
-		if (CurrentFrameJump >= 9)
-		{
-			CurrentFrameJump = 0;
-		}
-		//mRightSpeed += 250.0f;
-		mAnimSpriteComponent->SetCurrentAnimationManual(static_cast<int>(CurrentFrameJump), 2);
-		std::cout << "CurrentFrameJump" << CurrentFrameJump << std::endl;
-		//CurrentFrameWalk++;
+		// Create a laser and set its position/rotation to mine
+		Laser* laser = new Laser(GetGame());
+		laser->SetPosition(GetPosition());
+		laser->SetRotation(GetRotation());
 
 		// Reset laser cooldown (half second)
 		mLaserCooldown = 0.5f;

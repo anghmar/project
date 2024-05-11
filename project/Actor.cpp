@@ -72,7 +72,7 @@ void Actor::ComputeWorldTransform()
 	if (mRecomputeWorldTransform)
 	{
 		mRecomputeWorldTransform = false;
-		// SCALE > ROTATE > TRANSLATE // THIS ORDER IS NECESSARY!!!
+		// SCALE >> ROTATE ?> TRANSLATE // THIS ORDER IS NECESSARY!!!
 		mWorldTransform = Matrix4::CreateScale(mScale);
 		mWorldTransform *= Matrix4::CreateRotationZ(mRotation);
 		mWorldTransform *= Matrix4::CreateTranslation(Vector3(mPosition.x, mPosition.y, 0.0f));

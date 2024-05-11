@@ -1,6 +1,6 @@
 #include "Game.h"
-#include <GL/glew.h>
-#include "SDL_image.h"
+#include "GL/glew.h"
+#include <SDL2/SDL_image.h>
 #include <algorithm>
 #include "Actor.h"
 #include "SpriteComponent.h"
@@ -353,7 +353,7 @@ void Game::AddSprite(SpriteComponent* sprite)
 bool Game::LoadShaders()
 {
 	mSpriteShader = new Shader();
-	if (!mSpriteShader->Load("Shaders/Basic.vert", "Shaders/Basic.frag"))
+	if (!mSpriteShader->Load("Transform.vert", "Basic.frag"))
 	{
 		return false;
 	}

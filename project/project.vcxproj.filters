@@ -122,10 +122,10 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="info.txt" />
-    <Text Include="CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Basic.frag" />
     <None Include="Basic.vert" />
+    <None Include="Transform.vert" />
   </ItemGroup>
 </Project>
