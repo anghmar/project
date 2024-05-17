@@ -1,6 +1,7 @@
 #include "Game.h"
 #include "GL/glew.h"
 #include <SDL2/SDL_image.h>
+#include <SDL_image.h>
 #include <algorithm>
 #include "Actor.h"
 #include "SpriteComponent.h"
@@ -13,9 +14,10 @@
 
 Game::Game()
 	:mWindow(nullptr)
-	, mRenderer(nullptr)
-	, mIsRunning(true)
-	, mUpdatingActors(false)
+	,mSpriteShader(nullptr)
+	,mRenderer(nullptr)
+	,mIsRunning(true)
+	,mUpdatingActors(false)
 {
 
 }
@@ -271,12 +273,20 @@ void Game::RemoveAsteroid(Asteroid* ast)
 
 void Game::CreateSpriteVerts()
 {
+	// simple rectangle
 	float vertices[] = {
-		-0.5f,  0.5f, 0.f, 0.f, 0.f, // top left
-		 0.5f,  0.5f, 0.f, 0.f, 0.f, // top right
-		 0.5f, -0.5f, 0.f, 0.f, 0.f, // bottom right
-		-0.5f, -0.5f, 0.f, 0.f, 0.f  // bottom left
+		-0.5f,  0.5f, 0.f, // top left
+		 0.5f,  0.5f, 0.f, // top right
+		 0.5f, -0.5f, 0.f, // bottom right
+		-0.5f, -0.5f, 0.f  // bottom left
 	};
+
+	//float vertices[] = {
+	//	-0.5f,  0.5f, 0.f, 0.f, 0.5f, // top left
+	//	 0.5f,  0.5f, 0.f, 1.f, 0.f, // top right
+	//	 0.5f, -0.5f, 0.f, 1.f, 1.f, // bottom right
+	//	-0.5f, -0.5f, 0.f, 0.f, 1.f  // bottom left
+	//};
 
 	unsigned int indices[] = {
 		0, 1, 2,
@@ -353,10 +363,18 @@ void Game::AddSprite(SpriteComponent* sprite)
 bool Game::LoadShaders()
 {
 	mSpriteShader = new Shader();
-	if (!mSpriteShader->Load("Transform.vert", "Basic.frag"))
+	if (!mSpriteShader->Load("Basic.vert", "Basic.frag"))
 	{
 		return false;
 	}
+
+	/*if (!mSpriteShader->Load("Transform.vert", "Basic.frag"))
+	{
+		return false;
+	}*/
+
+
+
 	mSpriteShader->SetActive();
 }
 
