@@ -1,27 +1,22 @@
 #pragma once
 #include "Component.h"
 #include "SDL.h"
-#include "Shader.h"
-
 class SpriteComponent : public Component
 {
 public:
-	// Lower drawk order corresponds with further back
+	// (Lower draw order corresponds with further back)
 	SpriteComponent(class Actor* owner, int drawOrder = 100);
 	~SpriteComponent();
-	virtual void Draw(Shader* shader);
-	virtual void SetTexture(SDL_Texture* texture);
+
+	virtual void Draw(class Shader* shader);
+	virtual void SetTexture(class Texture* texture);
 
 	int GetDrawOrder() const { return mDrawOrder; }
-	int GetTextureHeight() const { return mTextureHeight; }
-	int GetTextureWidth() const { return mTextureWidth; }
-
+	int GetTexHeight() const { return mTexHeight; }
+	int GetTexWidth() const { return mTexWidth; }
 protected:
-	// Texture to draw
-	SDL_Texture* mTexture;
-
-	// Draw order used for painters algorithm
+	class Texture* mTexture;
 	int mDrawOrder;
-	int mTextureHeight;
-	int mTextureWidth;
+	int mTexWidth;
+	int mTexHeight;
 };

@@ -3,6 +3,7 @@
 #include "InputComponent.h"
 #include "Game.h"
 #include "Laser.h"
+#include "Texture.h"
 
 Ship::Ship(Game* game)
 	:Actor(game)

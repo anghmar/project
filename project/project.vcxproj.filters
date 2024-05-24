@@ -66,6 +66,9 @@
     <ClCompile Include="Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -119,6 +122,9 @@
     <ClInclude Include="Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="info.txt" />
@@ -127,5 +133,7 @@
     <None Include="Basic.frag" />
     <None Include="Basic.vert" />
     <None Include="Transform.vert" />
+    <None Include="Sprite.vert" />
+    <None Include="Sprite.frag" />
   </ItemGroup>
 </Project>

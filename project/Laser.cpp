@@ -4,6 +4,7 @@
 #include "Game.h"
 #include "CircleComponent.h"
 #include "Asteroid.h"
+#include "Texture.h"
 
 Laser::Laser(Game* game)
 	:Actor(game)

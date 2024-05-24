@@ -1,6 +1,5 @@
 #include "InputComponent.h"
 #include "Actor.h"
-#include <iostream>
 
 InputComponent::InputComponent(class Actor* owner)
 	:MoveComponent(owner)

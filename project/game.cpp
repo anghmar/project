@@ -1,23 +1,22 @@
 #include "Game.h"
-#include "GL/glew.h"
-#include <SDL2/SDL_image.h>
-#include <SDL_image.h>
+#include <GL/glew.h>
+#include "Texture.h"
+#include "VertexArray.h"
+#include "Shader.h"
 #include <algorithm>
 #include "Actor.h"
 #include "SpriteComponent.h"
+#include "Actor.h"
 #include "Ship.h"
-#include "VertexArray.h"
 #include "Asteroid.h"
 #include "Random.h"
-#include "Shader.h"
-
+#include <iostream>
 
 Game::Game()
 	:mWindow(nullptr)
-	,mSpriteShader(nullptr)
-	,mRenderer(nullptr)
-	,mIsRunning(true)
-	,mUpdatingActors(false)
+	, mSpriteShader(nullptr)
+	, mIsRunning(true)
+	, mUpdatingActors(false)
 {
 
 }
@@ -46,8 +45,7 @@ bool Game::Initialize()
 	// Force OpenGL to use hardware acceleration
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
-	mWindow = SDL_CreateWindow("Game Programming in C++ (Chapter 5)", 100, 100,
-		1024, 768, SDL_WINDOW_OPENGL);
+	mWindow = SDL_CreateWindow("Game Programming in C++ (Chapter 5)", 100, 100,	1024, 768, SDL_WINDOW_OPENGL);
 	if (!mWindow)
 	{
 		SDL_Log("Failed to create window: %s", SDL_GetError());
@@ -121,14 +119,15 @@ void Game::ProcessInput()
 		actor->ProcessInput(keyState);
 	}
 	mUpdatingActors = false;
+
+	std::cout << "mShip->GetRotation(): " << mShip->GetRotation() << std::endl;
 }
 
 void Game::UpdateGame()
 {
 	// Compute delta time
 	// Wait until 16ms has elapsed since last frame
-	while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16))
-		;
+	while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16));
 
 	float deltaTime = (SDL_GetTicks() - mTicksCount) / 1000.0f;
 	if (deltaTime > 0.05f)
@@ -172,34 +171,71 @@ void Game::UpdateGame()
 
 void Game::GenerateOutput()
 {
-	//Set the clear color to gray
+	// Set the clear color to grey
 	glClearColor(0.86f, 0.86f, 0.86f, 1.0f);
-	//Clear color buffer
+	// Clear the color buffer
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	// Set sprite shader and vertex array objects active
+	// Draw all sprite components
+	// Enable alpha blending on the color buffer
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// Set shader/vao as active
 	mSpriteShader->SetActive();
 	mSpriteVerts->SetActive();
 
-	// Draw all sprite components
 	for (auto sprite : mSprites)
 	{
 		sprite->Draw(mSpriteShader);
 	}
 
-	//Swap the buffers which also displays the scene
+	// Swap the buffers
 	SDL_GL_SwapWindow(mWindow);
+}
+
+bool Game::LoadShaders()
+{
+	mSpriteShader = new Shader();
+	if (!mSpriteShader->Load("Sprite.vert", "Sprite.frag"))
+	{
+		return false;
+	}
+
+	mSpriteShader->SetActive();
+	// Set the view-projection matrix
+	Matrix4 viewProj = Matrix4::CreateSimpleViewProj(1024.0f, 768.0f);
+	mSpriteShader->SetMatrixUniform("uViewProj", viewProj);
+	return true;
+}
+
+void Game::CreateSpriteVerts()
+{
+	float vertices[] = {
+		-0.5f,  0.5f, 0.f, 0.f, 0.f, // top left
+		 0.5f,  0.5f, 0.f, 1.f, 0.f, // top right
+		 0.5f, -0.5f, 0.f, 1.f, 1.f, // bottom right
+		-0.5f, -0.5f, 0.f, 0.f, 1.f  // bottom left
+	};
+
+	unsigned int indices[] = {
+		0, 1, 2,
+		2, 3, 0
+	};
+
+	mSpriteVerts = new VertexArray(vertices, 4, indices, 6);
 }
 
 void Game::LoadData()
 {
 	// Create player's ship
 	mShip = new Ship(this);
-	mShip->SetPosition(Vector2(512.0f, 384.0f));
+	
+	
 	mShip->SetRotation(Math::PiOver2);
 
 	// Create asteroids
-	const int numAsteroids = 50;
+	const int numAsteroids = 20;
 	for (int i = 0; i < numAsteroids; i++)
 	{
 		new Asteroid(this);
@@ -218,15 +254,15 @@ void Game::UnloadData()
 	// Destroy textures
 	for (auto i : mTextures)
 	{
-		SDL_DestroyTexture(i.second);
+		i.second->Unload();
+		delete i.second;
 	}
 	mTextures.clear();
 }
 
-SDL_Texture* Game::GetTexture(const std::string& fileName)
+Texture* Game::GetTexture(const std::string& fileName)
 {
-	SDL_Texture* tex = nullptr;
-	// Is the texture already in the map?
+	Texture* tex = nullptr;
 	auto iter = mTextures.find(fileName);
 	if (iter != mTextures.end())
 	{
@@ -234,24 +270,16 @@ SDL_Texture* Game::GetTexture(const std::string& fileName)
 	}
 	else
 	{
-		// Load from file
-		SDL_Surface* surf = IMG_Load(fileName.c_str());
-		if (!surf)
+		tex = new Texture();
+		if (tex->Load(fileName))
 		{
-			SDL_Log("Failed to load texture file %s", fileName.c_str());
-			return nullptr;
+			mTextures.emplace(fileName, tex);
 		}
-
-		// Create texture from surface
-		tex = SDL_CreateTextureFromSurface(mRenderer, surf);
-		SDL_FreeSurface(surf);
-		if (!tex)
+		else
 		{
-			SDL_Log("Failed to convert surface to texture for %s", fileName.c_str());
-			return nullptr;
+			delete tex;
+			tex = nullptr;
 		}
-
-		mTextures.emplace(fileName.c_str(), tex);
 	}
 	return tex;
 }
@@ -271,36 +299,12 @@ void Game::RemoveAsteroid(Asteroid* ast)
 	}
 }
 
-void Game::CreateSpriteVerts()
-{
-	// simple rectangle
-	float vertices[] = {
-		-0.5f,  0.5f, 0.f, // top left
-		 0.5f,  0.5f, 0.f, // top right
-		 0.5f, -0.5f, 0.f, // bottom right
-		-0.5f, -0.5f, 0.f  // bottom left
-	};
-
-	//float vertices[] = {
-	//	-0.5f,  0.5f, 0.f, 0.f, 0.5f, // top left
-	//	 0.5f,  0.5f, 0.f, 1.f, 0.f, // top right
-	//	 0.5f, -0.5f, 0.f, 1.f, 1.f, // bottom right
-	//	-0.5f, -0.5f, 0.f, 0.f, 1.f  // bottom left
-	//};
-
-	unsigned int indices[] = {
-		0, 1, 2,
-		2, 3, 0
-	};
-
-	mSpriteVerts = new VertexArray(vertices, 4, indices, 6);
-}
-
 void Game::Shutdown()
 {
 	UnloadData();
-	IMG_Quit();
-	SDL_DestroyRenderer(mRenderer);
+	delete mSpriteVerts;
+	mSpriteShader->Unload();
+	delete mSpriteShader;
 	SDL_GL_DeleteContext(mContext);
 	SDL_DestroyWindow(mWindow);
 	SDL_Quit();
@@ -346,9 +350,7 @@ void Game::AddSprite(SpriteComponent* sprite)
 	// (The first element with a higher draw order than me)
 	int myDrawOrder = sprite->GetDrawOrder();
 	auto iter = mSprites.begin();
-	for (;
-		iter != mSprites.end();
-		++iter)
+	for (; iter != mSprites.end(); ++iter)
 	{
 		if (myDrawOrder < (*iter)->GetDrawOrder())
 		{
@@ -360,27 +362,8 @@ void Game::AddSprite(SpriteComponent* sprite)
 	mSprites.insert(iter, sprite);
 }
 
-bool Game::LoadShaders()
-{
-	mSpriteShader = new Shader();
-	if (!mSpriteShader->Load("Basic.vert", "Basic.frag"))
-	{
-		return false;
-	}
-
-	/*if (!mSpriteShader->Load("Transform.vert", "Basic.frag"))
-	{
-		return false;
-	}*/
-
-
-
-	mSpriteShader->SetActive();
-}
-
 void Game::RemoveSprite(SpriteComponent* sprite)
 {
-	// (We can't swap because it ruins ordering)
 	auto iter = std::find(mSprites.begin(), mSprites.end(), sprite);
 	mSprites.erase(iter);
 }

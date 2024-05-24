@@ -1,5 +1,5 @@
 #include "Shader.h"
-//#include "Texture.h"
+#include "Texture.h"
 #include <SDL.h>
 #include <fstream>
 #include <sstream>
@@ -20,12 +20,18 @@ Shader::~Shader()
 bool Shader::Load(const std::string& vertName, const std::string& fragName)
 {
 	// Compile vertex and pixel shaders
-	if (!CompileShader(vertName, GL_VERTEX_SHADER, mVertexShader) || !CompileShader(fragName, GL_FRAGMENT_SHADER, mFragShader))
+	if (!CompileShader(vertName,
+		GL_VERTEX_SHADER,
+		mVertexShader) ||
+		!CompileShader(fragName,
+			GL_FRAGMENT_SHADER,
+			mFragShader))
 	{
 		return false;
 	}
 
-	// Now create a shader program that links together the vertex/frag shaders
+	// Now create a shader program that
+	// links together the vertex/frag shaders
 	mShaderProgram = glCreateProgram();
 	glAttachShader(mShaderProgram, mVertexShader);
 	glAttachShader(mShaderProgram, mFragShader);
@@ -62,7 +68,9 @@ void Shader::SetMatrixUniform(const char* name, const Matrix4& matrix)
 	glUniformMatrix4fv(loc, 1, GL_TRUE, matrix.GetAsFloatPtr());
 }
 
-bool Shader::CompileShader(const std::string& fileName,	GLenum shaderType, GLuint& outShader)
+bool Shader::CompileShader(const std::string& fileName,
+	GLenum shaderType,
+	GLuint& outShader)
 {
 	// Open file
 	std::ifstream shaderFile(fileName);
