@@ -30,6 +30,7 @@ bool Game::Initialize()
 	}
 
 	// Set OpenGL attributes
+
 	// Use the core OpenGL profile
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	// Specify version 3.3
@@ -62,9 +63,6 @@ bool Game::Initialize()
 		SDL_Log("Failed to initialize GLEW.");
 		return false;
 	}
-
-	// On some platforms, GLEW will emit a benign error code,
-	// so clear it
 	glGetError();
 
 	// Make sure we can create/compile shaders
@@ -171,8 +169,8 @@ void Game::UpdateGame()
 
 void Game::GenerateOutput()
 {
-	// Set the clear color to grey
-	glClearColor(0.86f, 0.86f, 0.86f, 1.0f);
+	// Backgroud/Clear color
+	glClearColor(0.75f, 0.5f, 0.75f, 1.0f);
 	// Clear the color buffer
 	glClear(GL_COLOR_BUFFER_BIT);
 
