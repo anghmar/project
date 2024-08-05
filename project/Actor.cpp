@@ -2,13 +2,12 @@
 #include "Game.h"
 #include "Component.h"
 #include <algorithm>
-#include <iostream>
 
 Actor::Actor(Game* game)
 	:mState(EActive)
-	, mPosition(Vector2::Zero)
+	, mPosition(Vector3::Zero)
+	, mRotation(Quaternion::Identity)
 	, mScale(1.0f)
-	, mRotation(0.0f)
 	, mGame(game)
 	, mRecomputeWorldTransform(true)
 {
@@ -71,15 +70,13 @@ void Actor::ActorInput(const uint8_t* keyState)
 
 void Actor::ComputeWorldTransform()
 {
-
-	//std::cout << "RecomputeWorldTransform: " << mRecomputeWorldTransform << std::endl;
 	if (mRecomputeWorldTransform)
 	{
 		mRecomputeWorldTransform = false;
 		// Scale, then rotate, then translate
 		mWorldTransform = Matrix4::CreateScale(mScale);
-		mWorldTransform *= Matrix4::CreateRotationZ(mRotation);
-		mWorldTransform *= Matrix4::CreateTranslation(Vector3(mPosition.x, mPosition.y, 0.0f));
+		mWorldTransform *= Matrix4::CreateFromQuaternion(mRotation);
+		mWorldTransform *= Matrix4::CreateTranslation(mPosition);
 
 		// Inform components world transform updated
 		for (auto comp : mComponents)
@@ -95,7 +92,9 @@ void Actor::AddComponent(Component* component)
 	// (The first element with a order higher than me)
 	int myOrder = component->GetUpdateOrder();
 	auto iter = mComponents.begin();
-	for (;iter != mComponents.end(); ++iter)
+	for (;
+		iter != mComponents.end();
+		++iter)
 	{
 		if (myOrder < (*iter)->GetUpdateOrder())
 		{

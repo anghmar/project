@@ -1,5 +1,5 @@
 #pragma once
-#include "SDL.h"
+#include <SDL.h>
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -16,48 +16,26 @@ public:
 	void AddActor(class Actor* actor);
 	void RemoveActor(class Actor* actor);
 
-	void AddSprite(class SpriteComponent* sprite);
-	void RemoveSprite(class SpriteComponent* sprite);
-
-	class Texture* GetTexture(const std::string& fileName);
-
-	// Game-specific (add/remove asteroid)
-	void AddAsteroid(class Asteroid* ast);
-	void RemoveAsteroid(class Asteroid* ast);
-	std::vector<class Asteroid*>& GetAsteroids() { return mAsteroids; }
+	class Renderer* GetRenderer() { return mRenderer; }
 private:
 	void ProcessInput();
 	void UpdateGame();
 	void GenerateOutput();
-	bool LoadShaders();
-	void CreateSpriteVerts();
 	void LoadData();
 	void UnloadData();
-
-	// Map of textures loaded
-	std::unordered_map<std::string, class Texture*> mTextures;
 
 	// All the actors in the game
 	std::vector<class Actor*> mActors;
 	// Any pending actors
 	std::vector<class Actor*> mPendingActors;
 
-	// All the sprite components drawn
-	std::vector<class SpriteComponent*> mSprites;
+	class Renderer* mRenderer;
 
-	// Sprite shader
-	class Shader* mSpriteShader;
-	// Sprite vertex array
-	class VertexArray* mSpriteVerts;
-
-	SDL_Window* mWindow;
-	SDL_GLContext mContext;
 	Uint32 mTicksCount;
 	bool mIsRunning;
 	// Track if we're updating actors right now
 	bool mUpdatingActors;
 
-	// Game-specific
-	class Ship* mShip;
-	std::vector<class Asteroid*> mAsteroids;
+	// Game-specific code
+	class CameraActor* mCameraActor;
 };
