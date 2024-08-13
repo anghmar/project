@@ -99,11 +99,11 @@ bool Mesh::Load(const std::string& fileName, Renderer* renderer)
 	{
 		// For now, just assume we have 8 elements
 		const rapidjson::Value& vert = vertsJson[i];
-		if (!vert.IsArray() || vert.Size() != 8)
+		/*if (!vert.IsArray() || vert.Size() != 8)
 		{
 			SDL_Log("Unexpected vertex format for %s", fileName.c_str());
 			return false;
-		}
+		}*/
 
 		Vector3 pos(vert[0].GetDouble(), vert[1].GetDouble(), vert[2].GetDouble());
 		mRadius = Math::Max(mRadius, pos.LengthSq());

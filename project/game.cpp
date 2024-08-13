@@ -134,7 +134,7 @@ void Game::LoadData()
 	a->SetPosition(Vector3(200.0f, 75.0f, 0.0f));
 	a->SetScale(50.0f);
 	Quaternion q(Vector3::UnitY, -Math::PiOver2);
-	q = Quaternion::Concatenate(q, Quaternion(Vector3::UnitZ, Math::Pi + Math::Pi / 4.0f));
+	q = Quaternion::Concatenate(q, Quaternion(Vector3::UnitZ, Math::Pi + Math::Pi));
 	a->SetRotation(q);
 	MeshComponent* mc = new MeshComponent(a);
 	mc->SetMesh(mRenderer->GetMesh("Assets/Cube.gpmesh"));
@@ -151,7 +151,23 @@ void Game::LoadData()
 	mc = new MeshComponent(a);
 	mc->SetMesh(mRenderer->GetMesh("Assets/Sphere.gpmesh"));
 
+	a = new Actor(this);
+	a->SetPosition(Vector3(800.0f, 375.0f, 50.0f));
+	a->SetScale(50.0f);
+	mc = new MeshComponent(a);
+	mc->SetMesh(mRenderer->GetMesh("Assets/Final.gpmesh"));
 
+	a = new Actor(this);
+	a->SetPosition(Vector3(500.0f, 375.0f, 50.0f));
+	a->SetScale(20.0f);
+	mc = new MeshComponent(a);
+	mc->SetMesh(mRenderer->GetMesh("Assets/valec.gpmesh"));
+
+	a = new Actor(this);
+	a->SetPosition(Vector3(100.0f, 375.0f, 50.0f));
+	a->SetScale(50.0f);
+	mc = new MeshComponent(a);
+	mc->SetMesh(mRenderer->GetMesh("Assets/nani.gpmesh"));
 	// Setup floor
 	const float start = -1250.0f;
 	const float size = 250.0f;
