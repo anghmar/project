@@ -71,8 +71,21 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\glew-2.0.0\include\;C:\SDL2\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;C:\glew-2.0.0\include\;C:\SDL2\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\x64;C:\glew-2.0.0;C:\glew-2.0.0\lib;C:\SDL2\lib\x64;$(LibraryPath)</LibraryPath>
+    <ExecutablePath>C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;$(ExecutablePath)</ExecutablePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ExecutablePath>C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;$(ExecutablePath)</ExecutablePath>
+    <IncludePath>C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ExecutablePath>C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;$(ExecutablePath)</ExecutablePath>
+    <IncludePath>C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ExecutablePath>C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;$(ExecutablePath)</ExecutablePath>
+    <IncludePath>C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -84,7 +97,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\src\vcpkg-master\installed\x64-windows\lib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\x64;C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\x64;C:\src\vcpkg-master\installed\x64-windows\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);fmod_vc.lib;fmodstudio_vc.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -101,7 +115,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\src\vcpkg-master\installed\x64-windows\lib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\x64;C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\x64;C:\src\vcpkg-master\installed\x64-windows\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);fmod_vc.lib;fmodstudio_vc.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -115,8 +130,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\src\vcpkg-master\installed\x64-windows\lib;C:\glew-2.0.0\lib\Release\x64;C:\SDL2\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;SDL2_image.lib;opengl32.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\x64;C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\x64;C:\src\vcpkg-master\installed\x64-windows\lib;C:\glew-2.0.0\lib\Release\x64;C:\SDL2\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;SDL2_image.lib;opengl32.lib;glew32.lib;%(AdditionalDependencies);fmod_vc.lib;fmodstudio_vc.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -133,13 +148,15 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\src\vcpkg-master\installed\x64-windows\lib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\x64;C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\x64;C:\src\vcpkg-master\installed\x64-windows\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);fmod_vc.lib;fmodstudio_vc.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="AnimSpriteComponent.cpp" />
     <ClCompile Include="Asteroid.cpp" />
+    <ClCompile Include="AudioSystem.cpp" />
     <ClCompile Include="BGSpriteComponent.cpp" />
     <ClCompile Include="CameraActor.cpp" />
     <ClCompile Include="CircleComponent.cpp" />

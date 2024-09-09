@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <SDL.h>
 #include "Math.h"
+#include "AudioSystem.h"
 
 struct DirectionalLight
 {
@@ -76,6 +77,9 @@ private:
 	// Width/height of screen
 	float mScreenWidth;
 	float mScreenHeight;
+
+	//AudioSystem pointer 
+	class AudioSystem* mAudioSystem;
 
 	// Lighting data
 	Vector3 mAmbientLight;

@@ -1,5 +1,4 @@
-#include <Sound>
-#include <fmod_studio_common.h>
+#pragma once
 
 namespace FMOD
 {
@@ -16,19 +15,18 @@ namespace FMOD
 
 class AudioSystem
 {
+	public:
+		AudioSystem(class Game* game);
+		~AudioSystem();
 
-public:
-	AudioSystem(class Game* game);
-	~AudioSystem();
+		bool Initialize();
+		void Shutdown();
+		void Update(float deltaTime);
 
-	bool Initialize();
-	void Shutdown();
-	void Update(float deltaTime);
-
-private:
-	class Game* game;
-	//FMOD studio sys
-	FMOD::Studio::System* mSystem;
-	//fmod low level sys (if needed)
-	FMOD::System* mLowLevelSystem;
+	private:
+		class Game* mGame;
+		//FMOD studio sys
+		FMOD::Studio::System* mSystem;
+		//fmod low level sys (if needed)
+		FMOD::System* mCoreSystem;
 };

@@ -6,6 +6,7 @@
 #include "MeshComponent.h"
 #include "CameraActor.h"
 #include "PlaneActor.h"
+#include "AudioSystem.h"
 
 Game::Game()
 	:mRenderer(nullptr)
@@ -25,11 +26,21 @@ bool Game::Initialize()
 
 	// Create the renderer
 	mRenderer = new Renderer(this);
-	if (!mRenderer->Initialize(1024.0f, 768.0f))
+	if (!mRenderer->Initialize(1920.0f, 1080.0f))
 	{
 		SDL_Log("Failed to initialize renderer");
 		delete mRenderer;
 		mRenderer = nullptr;
+		return false;
+	}
+
+	mAudioSystem = new AudioSystem(this);
+	if (!mAudioSystem->Initialize())
+	{
+		SDL_Log("Failed to initialize AudioSystem");
+		mAudioSystem->Shutdown();
+		delete mAudioSystem;
+		mAudioSystem = nullptr;
 		return false;
 	}
 
