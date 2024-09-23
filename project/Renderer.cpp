@@ -41,7 +41,9 @@ bool Renderer::Initialize(float screenWidth, float screenHeight)
 	// Force OpenGL to use hardware acceleration
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
-	mWindow = SDL_CreateWindow("Game Programming in C++ (Chapter 6)", 100, 100,
+
+	//SOME USEFULL FLAGS FOR CREATING WINDOW  | SDL_WINDOW_FULLSCREEN  | SDL_WINDOW_FULLSCREEN_DESKTOP
+	mWindow = SDL_CreateWindow("Pjetka Engine)", 100, 100,
 		static_cast<int>(mScreenWidth), static_cast<int>(mScreenHeight), SDL_WINDOW_OPENGL);
 	if (!mWindow)
 	{
@@ -51,6 +53,8 @@ bool Renderer::Initialize(float screenWidth, float screenHeight)
 
 	// Create an OpenGL context
 	mContext = SDL_GL_CreateContext(mWindow);
+
+	
 
 	// Initialize GLEW
 	glewExperimental = GL_TRUE;

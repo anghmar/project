@@ -28,10 +28,17 @@ class AudioSystem
 		void Shutdown();
 		void Update(float deltaTime);
 
-
+		//banks
 		void LoadBank(const std::string& name);
 		void UnloadBank(const std::string& name);
 		void UnloadAllBanks(const std::string& name);
+
+		//events
+		SoundEvent AudioSystem::PlayEvent(const std::string& name);
+
+	protected:
+		friend class SoundEvent;
+		FMOD::Studio::EventInstance* GetEventInstance(unsigned int id);
 
 	private:
 		class Game* mGame;
@@ -39,6 +46,9 @@ class AudioSystem
 		FMOD::Studio::System* mSystem;
 		//fmod low level sys (if needed)
 		FMOD::System* mCoreSystem;
+
+		// Tracks the next ID to use for event instances
+		static unsigned int sNextID;
 
 		//Map of loaded banks
 		std::unordered_map<std::string, FMOD::Studio::Bank*> mBanks; //string is filename

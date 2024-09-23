@@ -2,6 +2,7 @@
 #include <fmod_studio.hpp>
 #include <fmod_errors.h>
 #include <SDL.h>
+#include "SoundEvent.h"
 
 AudioSystem::AudioSystem(Game* game)
     :mGame(game)
@@ -55,6 +56,28 @@ void AudioSystem::Shutdown()
 
 void AudioSystem::Update(float deltaTime)
 {
+    //Find any stopped event instances
+    std::vector<unsigned int> done;
+    for (auto& iter : mEventInstances)
+    {
+        FMOD::Studio::EventInstance* e = iter.second;
+
+        //Get State of this event
+        FMOD_STUDIO_PLAYBACK_STATE state;
+        e->getPlaybackState(&state);
+        if (state == FMOD_STUDIO_PLAYBACK_STOPPED)
+        {
+            //Release the event and add ID to done
+            e->release();
+            done.emplace_back(iter.first);
+        }
+    }
+
+    for (auto id : done)
+    {
+        mEventInstances.erase(id);
+    }
+
     mSystem->update();
 }
 
@@ -63,6 +86,7 @@ void AudioSystem::LoadBank(const std::string& name)
     //Prevent double loading
     if (mBanks.find(name) != mBanks.end())
     {
+        //just this?
         return;
     }
 
@@ -177,4 +201,36 @@ void AudioSystem::UnloadAllBanks(const std::string& name)
     mBanks.clear();
     //No banks, no events
     mEvents.clear();
+}
+
+SoundEvent AudioSystem::PlayEvent(const std::string& name)
+{
+    unsigned int retID = 0;
+    auto iter = mEvents.find(name);
+    if (iter != mEvents.end())
+    {
+        FMOD::Studio::EventInstance* event = nullptr;
+        iter->second->createInstance(&event);
+        if (event)
+        {
+            event->start();
+            
+            //might fuck
+            retID = ++sNextID;
+            mEventInstances.emplace(retID, event);
+        }
+    }
+    return SoundEvent(this, retID);
+}
+
+FMOD::Studio::EventInstance* AudioSystem::GetEventInstance(unsigned int id)
+{
+    FMOD::Studio::EventInstance* event = nullptr;
+    auto iter = mEventInstances.find(id);
+    if (iter != mEventInstances.end())
+    {
+        event = iter->second;
+    }
+
+    return event;
 }

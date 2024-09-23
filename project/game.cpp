@@ -7,6 +7,8 @@
 #include "CameraActor.h"
 #include "PlaneActor.h"
 #include "AudioSystem.h"
+#include "Texture.h"
+#include "Mesh.h"
 
 Game::Game()
 	:mRenderer(nullptr)
@@ -229,7 +231,7 @@ void Game::LoadData()
 
 	// UI elements
 	a = new Actor(this);
-	a->SetPosition(Vector3(-350.0f, -350.0f, 0.0f));
+	a->SetPosition(Vector3(0.0f, -350.0f, 0.0f));
 	SpriteComponent* sc = new SpriteComponent(a);
 	sc->SetTexture(mRenderer->GetTexture("Assets/HealthBar.png"));
 
@@ -237,6 +239,7 @@ void Game::LoadData()
 	a->SetPosition(Vector3(375.0f, -275.0f, 0.0f));
 	a->SetScale(0.75f);
 	sc = new SpriteComponent(a);
+
 	sc->SetTexture(mRenderer->GetTexture("Assets/Radar.png"));
 }
 

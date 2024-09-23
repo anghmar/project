@@ -30,19 +30,19 @@ void CameraActor::ActorInput(const uint8_t* keys)
 	// wasd movement
 	if (keys[SDL_SCANCODE_W])
 	{
-		forwardSpeed += 300.0f;
+		forwardSpeed += 500.0f;
 	}
 	if (keys[SDL_SCANCODE_S])
 	{
-		forwardSpeed -= 300.0f;
+		forwardSpeed -= 500.0f;
 	}
 	if (keys[SDL_SCANCODE_A])
 	{
-		angularSpeed -= Math::TwoPi/2;
+		angularSpeed -= Math::TwoPi/4;
 	}
 	if (keys[SDL_SCANCODE_D])
 	{
-		angularSpeed += Math::TwoPi/2;
+		angularSpeed += Math::TwoPi/4;
 	}
 
 	mMoveComp->SetForwardSpeed(forwardSpeed);
