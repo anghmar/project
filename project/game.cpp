@@ -7,6 +7,7 @@
 #include "CameraActor.h"
 #include "PlaneActor.h"
 #include "AudioSystem.h"
+#include "SoundEvent.h"
 #include "Texture.h"
 #include "Mesh.h"
 
@@ -133,6 +134,8 @@ void Game::UpdateGame()
 	{
 		delete actor;
 	}
+
+	//mAudioSystem->PlayEvent("event:/Music");
 }
 
 void Game::GenerateOutput()

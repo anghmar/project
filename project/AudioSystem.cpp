@@ -4,6 +4,8 @@
 #include <SDL.h>
 #include "SoundEvent.h"
 
+unsigned int AudioSystem::sNextID = 0;
+
 AudioSystem::AudioSystem(Game* game)
     :mGame(game)
     ,mSystem(nullptr)

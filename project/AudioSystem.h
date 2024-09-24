@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include <string>
+#include "SoundEvent.h"
 
 //SAMPLE DATA is the raw audio data that events reference. 
 //STREAMING DATA is sample data that streams into memory in small pieces at a time (MUSIC AND DIALOGUES)
@@ -34,7 +35,7 @@ class AudioSystem
 		void UnloadAllBanks(const std::string& name);
 
 		//events
-		SoundEvent AudioSystem::PlayEvent(const std::string& name);
+		SoundEvent PlayEvent(const std::string& name);
 
 	protected:
 		friend class SoundEvent;
