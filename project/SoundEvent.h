@@ -23,6 +23,10 @@ public:
 	float GetPitch() const;
 	float GetParameter(const std::string& name);
 
+	//3D sound attributes
+	bool Is3D();
+	void Set3DAttributes(const Matrix4& worldTrans);
+
 protected:
 	//Make this constructor protected and AudioSystem friendly so AudioSystem can access this constructor
 	friend class AudioSystem;

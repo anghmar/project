@@ -10,6 +10,7 @@
 #include "SoundEvent.h"
 #include "Texture.h"
 #include "Mesh.h"
+#include "AudioComponent.h"
 
 Game::Game()
 	:mRenderer(nullptr)

@@ -25,6 +25,8 @@ class AudioSystem
 		AudioSystem(class Game* game);
 		~AudioSystem();
 
+		void SetListener(const Matrix4& viewMatrix);
+
 		bool Initialize();
 		void Shutdown();
 		void Update(float deltaTime);
