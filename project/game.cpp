@@ -1,5 +1,6 @@
 #include "Game.h"
 #include <algorithm>
+#include <iostream>
 #include "Renderer.h"
 #include "Actor.h"
 #include "SpriteComponent.h"
@@ -75,6 +76,15 @@ void Game::ProcessInput()
 		case SDL_QUIT:
 			mIsRunning = false;
 			break;
+			// This fires when a key's initially pressed
+		case SDL_KEYDOWN:
+			if (!event.key.repeat)
+			{
+				HandleKeyPress(event.key.keysym.sym);
+			}
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -90,12 +100,70 @@ void Game::ProcessInput()
 	}
 }
 
+void Game::HandleKeyPress(int key)
+{
+	switch (key)
+	{
+		case '-':
+		{
+			// Reduce master volume
+			float volume = mAudioSystem->GetBusVolume("bus:/");
+			volume = Math::Max(0.0f, volume - 0.1f);
+			mAudioSystem->SetBusVolume("bus:/", volume);
+			std::cout << "Lowering MV" << std::endl;
+			break;
+		}
+		case '=':
+		{
+			// Increase master volume
+			float volume = mAudioSystem->GetBusVolume("bus:/");
+			volume = Math::Min(1.0f, volume + 0.1f);
+			mAudioSystem->SetBusVolume("bus:/", volume);
+			std::cout << "Increasing MV" << std::endl;
+			break;
+		}
+		case 'e':
+			// Play explosion
+			mAudioSystem->PlayEvent("event:/Explosion2D");
+			std::cout << "Boom" << std::endl;
+			break;
+		case 'm':
+			// Toggle music pause state
+			mMusicEvent.SetPaused(!mMusicEvent.GetPaused());
+			std::cout << "Pausing Music" << std::endl;
+			break;
+		case 'r':
+			// Stop or start reverb snapshot
+			if (!mReverbSnap.IsValid())
+			{
+				mReverbSnap = mAudioSystem->PlayEvent("snapshot:/WithReverb");
+				std::cout << "Reverb" << std::endl;
+			}
+			else
+			{
+				mReverbSnap.Stop();
+			}
+			break;
+		case '1':
+			// Set default footstep surface
+			mCameraActor->SetFootstepSurface(0.0f);
+			std::cout << "Default Footsteps" << std::endl;
+			break;
+		case '2':
+			// Set grass footstep surface
+			mCameraActor->SetFootstepSurface(0.5f);
+			std::cout << "Grass Footsteps" << std::endl;
+			break;
+		default:
+			break;
+	}
+}
+
 void Game::UpdateGame()
 {
 	// Compute delta time
 	// Wait until 16ms has elapsed since last frame
-	while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16))
-		;
+	while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16));
 
 	float deltaTime = (SDL_GetTicks() - mTicksCount) / 1000.0f;
 	if (deltaTime > 0.05f)
@@ -137,6 +205,7 @@ void Game::UpdateGame()
 	}
 
 	//mAudioSystem->PlayEvent("event:/Music");
+	mAudioSystem->Update(deltaTime);
 }
 
 void Game::GenerateOutput()
@@ -245,6 +314,18 @@ void Game::LoadData()
 	sc = new SpriteComponent(a);
 
 	sc->SetTexture(mRenderer->GetTexture("Assets/Radar.png"));
+
+	// Create spheres with audio components playing different sounds
+	a = new Actor(this);
+	a->SetPosition(Vector3(100.0f, -75.0f, 0.0f));
+	a->SetScale(1.0f);
+	mc = new MeshComponent(a);
+	mc->SetMesh(mRenderer->GetMesh("Assets/Sphere.gpmesh"));
+	AudioComponent* ac = new AudioComponent(a);
+	//ac->PlayEvent("event:/FireLoop");
+
+	//Music
+	mMusicEvent = mAudioSystem->PlayEvent("event:/Music");
 }
 
 void Game::UnloadData()
@@ -268,6 +349,11 @@ void Game::Shutdown()
 	if (mRenderer)
 	{
 		mRenderer->Shutdown();
+	}
+
+	if (mAudioSystem)
+	{
+		mAudioSystem->Shutdown();
 	}
 	SDL_Quit();
 }

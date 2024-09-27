@@ -1,6 +1,7 @@
 #include "SoundEvent.h"
 #include "AudioSystem.h"
 #include <fmod_studio.hpp>
+#include <iostream>
 
 namespace
 {
@@ -167,4 +168,5 @@ void SoundEvent::Set3DAttributes(const Matrix4& worldTrans)
 		attr.velocity = { 0.0f, 0.0f, 0.0f };
 		// Send to FMOD (0 = only one listener)
 		event->set3DAttributes(&attr);
+	}
 }

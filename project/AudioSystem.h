@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <string>
 #include "SoundEvent.h"
+#include "Math.h"
 
 //SAMPLE DATA is the raw audio data that events reference. 
 //STREAMING DATA is sample data that streams into memory in small pieces at a time (MUSIC AND DIALOGUES)
@@ -25,16 +26,23 @@ class AudioSystem
 		AudioSystem(class Game* game);
 		~AudioSystem();
 
-		void SetListener(const Matrix4& viewMatrix);
-
 		bool Initialize();
 		void Shutdown();
 		void Update(float deltaTime);
+
+		// For positional audio
+		void SetListener(const Matrix4& viewMatrix);
 
 		//banks
 		void LoadBank(const std::string& name);
 		void UnloadBank(const std::string& name);
 		void UnloadAllBanks(const std::string& name);
+
+		//Control for buses
+		float GetBusVolume(const std::string& name) const;
+		bool GetBusPaused(const std::string& name) const;
+		void SetBusVolume(const std::string& name, float volume);
+		void SetBusPaused(const std::string& name, bool pause);
 
 		//events
 		SoundEvent PlayEvent(const std::string& name);

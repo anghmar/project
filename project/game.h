@@ -21,6 +21,7 @@ class Game
 		class AudioSystem* GetAudioSystem() { return mAudioSystem; }
 	private:
 		void ProcessInput();
+		void HandleKeyPress(int key);
 		void UpdateGame();
 		void GenerateOutput();
 		void LoadData();
@@ -42,4 +43,8 @@ class Game
 
 		// Game-specific code
 		class CameraActor* mCameraActor;
+
+		//Sound Events
+		SoundEvent mMusicEvent;
+		SoundEvent mReverbSnap;
 };

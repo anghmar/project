@@ -32,7 +32,7 @@ void AudioComponent::Update(float deltaTime)
 	}
 
 	//Remove invalid 3D events
-	auto iter = mEvents3D.begin();
+	iter = mEvents3D.begin();
 	while (iter != mEvents3D.end())
 	{
 		if (!iter->IsValid())

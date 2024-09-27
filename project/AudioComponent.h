@@ -9,6 +9,8 @@
 //go from/in camera see page 239 in GMCPP
 
 //Doppler Effect -> see 240 in GMCPP
+
+//Audio occlusion -> see 244 in GMCPP
 class AudioComponent : public Component
 {
 

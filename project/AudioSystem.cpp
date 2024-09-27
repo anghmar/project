@@ -268,3 +268,45 @@ FMOD::Studio::EventInstance* AudioSystem::GetEventInstance(unsigned int id)
 
     return event;
 }
+
+float AudioSystem::GetBusVolume(const std::string& name) const
+{
+    float retVal = 0.0f;
+    const auto iter = mBuses.find(name);
+    if (iter != mBuses.end())
+    {
+        iter->second->getVolume(&retVal);
+    }
+
+    return retVal;
+}
+
+bool AudioSystem::GetBusPaused(const std::string& name) const
+{
+    bool retVal = false;
+    const auto iter = mBuses.find(name);
+    if (iter != mBuses.end())
+    {
+        iter->second->getPaused(&retVal);
+    }
+
+    return retVal;
+}
+
+void AudioSystem::SetBusVolume(const std::string& name, float volume)
+{
+    auto iter = mBuses.find(name);
+    if (iter != mBuses.end())
+    {
+        iter->second->setVolume(volume);
+    }
+}
+
+void AudioSystem::SetBusPaused(const std::string& name, bool pause)
+{
+    auto iter = mBuses.find(name);
+    if (iter != mBuses.end())
+    {
+        iter->second->setPaused(pause);
+    }
+}
