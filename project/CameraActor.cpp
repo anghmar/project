@@ -14,7 +14,7 @@ CameraActor::CameraActor(Game* game)
 	mAudioComp = new AudioComponent(this);
 	mLastFootstep = 0.0f;
 	mFootstep = mAudioComp->PlayEvent("event:/Footstep");
-	//mFootstep.SetPaused(true);
+	mFootstep.SetPaused(true);
 }
 
 void CameraActor::UpdateActor(float deltaTime)
@@ -25,10 +25,7 @@ void CameraActor::UpdateActor(float deltaTime)
 	mLastFootstep -= deltaTime;
 	if (!Math::NearZero(mMoveComp->GetForwardSpeed()) && mLastFootstep <= 0.0f)
 	{
-		std::cout << "FOOTIE STEPPIES" << std::endl;
-		//mFootstep.SetPaused(false);
-		std::cout << mFootstep.GetPaused() << std::endl;
-		std::cout << mFootstep.IsValid() << std::endl;
+		mFootstep.SetPaused(false);
 		mFootstep.Restart();
 		mLastFootstep = 0.5f;
 	}

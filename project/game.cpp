@@ -175,7 +175,7 @@ void Game::UpdateGame()
 	// Update all actors
 	mUpdatingActors = true;
 	for (auto actor : mActors)
-	{
+	{ 
 		actor->Update(deltaTime);
 	}
 	mUpdatingActors = false;

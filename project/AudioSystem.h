@@ -36,7 +36,7 @@ class AudioSystem
 		//banks
 		void LoadBank(const std::string& name);
 		void UnloadBank(const std::string& name);
-		void UnloadAllBanks(const std::string& name);
+		void UnloadAllBanks();
 
 		//Control for buses
 		float GetBusVolume(const std::string& name) const;
