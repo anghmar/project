@@ -27,6 +27,9 @@ class Game
 		void LoadData();
 		void UnloadData();
 
+		//Input system pointer
+		class InputSystem* mInputSystem;
+
 		// All the actors in the game
 		std::vector<class Actor*> mActors;
 		// Any pending actors
