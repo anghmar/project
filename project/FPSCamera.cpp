@@ -1,5 +1,6 @@
 #include "FPSCamera.h"
 #include "Actor.h"
+#include <iostream>
 
 FPSCamera::FPSCamera(Actor* owner)
 	:CameraComponent(owner)
@@ -18,6 +19,9 @@ void FPSCamera::Update(float deltaTime)
 
 	// Update pitch based on pitch speed
 	mPitch += mPitchSpeed * deltaTime;
+
+	std::cout << mPitch << std::endl;
+
 	// Clamp pitch to [-max, +max]
 	mPitch = Math::Clamp(mPitch, -mMaxPitch, mMaxPitch);
 	// Make a quaternion representing pitch rotation,
@@ -25,8 +29,7 @@ void FPSCamera::Update(float deltaTime)
 	Quaternion q(mOwner->GetRight(), mPitch);
 
 	// Rotate owner forward by pitch quaternion
-	Vector3 viewForward = Vector3::Transform(
-		mOwner->GetForward(), q);
+	Vector3 viewForward = Vector3::Transform(mOwner->GetForward(), q);
 	// Target position 100 units in front of view forward
 	Vector3 target = cameraPos + viewForward * 100.0f;
 	// Also rotate up by pitch quaternion

@@ -5,10 +5,10 @@
 #include "Actor.h"
 #include "SpriteComponent.h"
 #include "MeshComponent.h"
-#include "CameraActor.h"
+//#include "CameraActor.h"
 #include "PlaneActor.h"
 #include "AudioSystem.h"
-#include "SoundEvent.h"
+//#include "SoundEvent.h"
 #include "Texture.h"
 #include "Mesh.h"
 #include "AudioComponent.h"
@@ -34,9 +34,9 @@ bool Game::Initialize()
 		return false;
 	}
 
-	// Create the renderer
+	//Create the renderer
 	mRenderer = new Renderer(this);
-	if (!mRenderer->Initialize(1920.0f, 1080.0f))
+	if (!mRenderer->Initialize(1024.0f, 768.0f))
 	{
 		SDL_Log("Failed to initialize renderer");
 		delete mRenderer;
@@ -44,6 +44,7 @@ bool Game::Initialize()
 		return false;
 	}
 
+	//Create the audio system
 	mAudioSystem = new AudioSystem(this);
 	if (!mAudioSystem->Initialize())
 	{
@@ -78,21 +79,21 @@ void Game::ProcessInput()
 	{
 		switch (event.type)
 		{
-		case SDL_QUIT:
-			mIsRunning = false;
-			break;
-			// This fires when a key's initially pressed
-		case SDL_KEYDOWN:
-			if (!event.key.repeat)
-			{
-				HandleKeyPress(event.key.keysym.sym);
-			}
-			break;
-		case SDL_MOUSEBUTTONDOWN:
-			HandleKeyPress(event.button.button);
-			break;
-		default:
-			break;
+			case SDL_QUIT:
+				mIsRunning = false;
+				break;
+				// This fires when a key's initially pressed
+			case SDL_KEYDOWN:
+				if (!event.key.repeat)
+				{
+					HandleKeyPress(event.key.keysym.sym);
+				}
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				HandleKeyPress(event.button.button);
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -130,17 +131,15 @@ void Game::HandleKeyPress(int key)
 			std::cout << "Increasing MV" << std::endl;
 			break;
 		}
-		case 'e':
-			// Play explosion
-			mAudioSystem->PlayEvent("event:/Explosion2D");
-			std::cout << "Boom" << std::endl;
-			break;
 		case 'm':
+		{
 			// Toggle music pause state
 			mMusicEvent.SetPaused(!mMusicEvent.GetPaused());
 			std::cout << "Pausing Music" << std::endl;
 			break;
+		}
 		case 'r':
+		{
 			// Stop or start reverb snapshot
 			if (!mReverbSnap.IsValid())
 			{
@@ -152,6 +151,7 @@ void Game::HandleKeyPress(int key)
 				mReverbSnap.Stop();
 			}
 			break;
+		}
 		case '1':
 		case '2':
 		case '3':
@@ -169,6 +169,10 @@ void Game::HandleKeyPress(int key)
 			// Set spheres to points
 			mStartSphere->SetPosition(start);
 			mEndSphere->SetPosition(end);
+			
+			// Play explosion/fire
+			mAudioSystem->PlayEvent("event:/Explosion2D");
+			std::cout << "Boom" << std::endl;
 			break;
 		}
 		default:
@@ -248,29 +252,6 @@ void Game::LoadData()
 	mc = new MeshComponent(a);
 	mc->SetMesh(mRenderer->GetMesh("Assets/Sphere.gpmesh"));
 
-	a = new Actor(this);
-	a->SetPosition(Vector3(400.0f, -175.0f, 0.0f));
-	a->SetScale(5.0f);
-	mc = new MeshComponent(a);
-	mc->SetMesh(mRenderer->GetMesh("Assets/Sphere.gpmesh"));
-
-	a = new Actor(this);
-	a->SetPosition(Vector3(800.0f, 375.0f, 50.0f));
-	a->SetScale(50.0f);
-	mc = new MeshComponent(a);
-	mc->SetMesh(mRenderer->GetMesh("Assets/Final.gpmesh"));
-
-	a = new Actor(this);
-	a->SetPosition(Vector3(500.0f, 375.0f, 50.0f));
-	a->SetScale(20.0f);
-	mc = new MeshComponent(a);
-	mc->SetMesh(mRenderer->GetMesh("Assets/valec.gpmesh"));
-
-	a = new Actor(this);
-	a->SetPosition(Vector3(100.0f, 375.0f, 50.0f));
-	a->SetScale(50.0f);
-	mc = new MeshComponent(a);
-	mc->SetMesh(mRenderer->GetMesh("Assets/nani.gpmesh"));
 	// Setup floor
 	const float start = -1250.0f;
 	const float size = 250.0f;
@@ -316,9 +297,6 @@ void Game::LoadData()
 	dir.mDiffuseColor = Vector3(0.78f, 0.88f, 1.0f);
 	dir.mSpecColor = Vector3(0.1f, 0.2f, 0.3f);
 
-	// Camera actor
-	mCameraActor = new CameraActor(this);
-
 	// UI elements
 	a = new Actor(this);
 	a->SetPosition(Vector3(0.0f, -350.0f, 0.0f));
@@ -329,7 +307,6 @@ void Game::LoadData()
 	a->SetPosition(Vector3(375.0f, -275.0f, 0.0f));
 	a->SetScale(0.75f);
 	sc = new SpriteComponent(a);
-
 	sc->SetTexture(mRenderer->GetTexture("Assets/Radar.png"));
 
 	// Create spheres with audio components playing different sounds
@@ -340,6 +317,12 @@ void Game::LoadData()
 	mc->SetMesh(mRenderer->GetMesh("Assets/Sphere.gpmesh"));
 	AudioComponent* ac = new AudioComponent(a);
 	//ac->PlayEvent("event:/FireLoop");
+
+	// UI Crosshair
+	a = new Actor(this);
+	a->SetScale(2.0f);
+	mCrosshair = new SpriteComponent(a);
+	mCrosshair->SetTexture(mRenderer->GetTexture("Assets/Crosshair.png"));
 
 	//Music
 	mMusicEvent = mAudioSystem->PlayEvent("event:/Music");
@@ -357,18 +340,18 @@ void Game::LoadData()
 
 	ChangeCamera('1');
 
-	//// Spheres for demonstrating unprojection
-	//mStartSphere = new Actor(this);
-	//mStartSphere->SetPosition(Vector3(10000.0f, 0.0f, 0.0f));
-	//mStartSphere->SetScale(0.25f);
-	//mc = new MeshComponent(mStartSphere);
-	//mc->SetMesh(mRenderer->GetMesh("Assets/Sphere.gpmesh"));
-	//mEndSphere = new Actor(this);
-	//mEndSphere->SetPosition(Vector3(10000.0f, 0.0f, 0.0f));
-	//mEndSphere->SetScale(0.25f);
-	//mc = new MeshComponent(mEndSphere);
-	//mc->SetMesh(mRenderer->GetMesh("Assets/Sphere.gpmesh"));
-	//mc->SetTextureIndex(1);
+	// Spheres for demonstrating unprojection
+	mStartSphere = new Actor(this);
+	mStartSphere->SetPosition(Vector3(10000.0f, 0.0f, 0.0f));
+	mStartSphere->SetScale(0.25f);
+	mc = new MeshComponent(mStartSphere);
+	mc->SetMesh(mRenderer->GetMesh("Assets/Sphere.gpmesh"));
+	mEndSphere = new Actor(this);
+	mEndSphere->SetPosition(Vector3(10000.0f, 0.0f, 0.0f));
+	mEndSphere->SetScale(0.25f);
+	mc = new MeshComponent(mEndSphere);
+	mc->SetMesh(mRenderer->GetMesh("Assets/Sphere.gpmesh"));
+	mc->SetTextureIndex(1);
 }
 
 void Game::UnloadData()
@@ -440,33 +423,37 @@ void Game::ChangeCamera(int mode)
 	// Disable everything
 	mFPSActor->SetState(Actor::EPaused);
 	mFPSActor->SetVisible(false);
+
 	mCrosshair->SetVisible(false);
+
 	mFollowActor->SetState(Actor::EPaused);
 	mFollowActor->SetVisible(false);
+
 	mOrbitActor->SetState(Actor::EPaused);
 	mOrbitActor->SetVisible(false);
+
 	mSplineActor->SetState(Actor::EPaused);
 
 	// Enable the camera specified by the mode
 	switch (mode)
 	{
-	case '1':
-	default:
-		mFPSActor->SetState(Actor::EActive);
-		mFPSActor->SetVisible(true);
-		mCrosshair->SetVisible(true);
-		break;
-	case '2':
-		mFollowActor->SetState(Actor::EActive);
-		mFollowActor->SetVisible(true);
-		break;
-	case '3':
-		mOrbitActor->SetState(Actor::EActive);
-		mOrbitActor->SetVisible(true);
-		break;
-	case '4':
-		mSplineActor->SetState(Actor::EActive);
-		mSplineActor->RestartSpline();
-		break;
+		case '1':
+		default:
+			mFPSActor->SetState(Actor::EActive);
+			mFPSActor->SetVisible(true);
+			mCrosshair->SetVisible(true);
+			break;
+		case '2':
+			mFollowActor->SetState(Actor::EActive);
+			mFollowActor->SetVisible(true);
+			break;
+		case '3':
+			mOrbitActor->SetState(Actor::EActive);
+			mOrbitActor->SetVisible(true);
+			break;
+		case '4':
+			mSplineActor->SetState(Actor::EActive);
+			mSplineActor->RestartSpline();
+			break;
 	}
 }
