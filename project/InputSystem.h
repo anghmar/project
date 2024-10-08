@@ -16,14 +16,6 @@ enum ButtonState
 	EHeld
 };
 
-// Wrapper that contains current state of input
-struct InputState
-{
-	KeyboardState Keyboard;
-	MouseState Mouse;
-	ControllerState Controller;
-};
-
 // Helper for keyboard input
 class KeyboardState
 {
@@ -90,6 +82,14 @@ private:
 	float mRightTrigger;
 	// Is this controller connected?
 	bool mIsConnected;
+};
+
+// Wrapper that contains current state of input
+struct InputState
+{
+	KeyboardState Keyboard;
+	MouseState Mouse;
+	ControllerState Controller;
 };
 
 class InputSystem

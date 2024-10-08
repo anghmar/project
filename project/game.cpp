@@ -12,9 +12,14 @@
 #include "Texture.h"
 #include "Mesh.h"
 #include "AudioComponent.h"
+#include "FPSActor.h"
+#include "FollowActor.h"
+#include "OrbitActor.h"
+#include "SplineActor.h"
 
 Game::Game()
 	:mRenderer(nullptr)
+	, mAudioSystem(nullptr)
 	, mIsRunning(true)
 	, mUpdatingActors(false)
 {
@@ -83,6 +88,9 @@ void Game::ProcessInput()
 				HandleKeyPress(event.key.keysym.sym);
 			}
 			break;
+		case SDL_MOUSEBUTTONDOWN:
+			HandleKeyPress(event.button.button);
+			break;
 		default:
 			break;
 		}
@@ -145,15 +153,24 @@ void Game::HandleKeyPress(int key)
 			}
 			break;
 		case '1':
-			// Set default footstep surface
-			mCameraActor->SetFootstepSurface(0.0f);
-			std::cout << "Default Footsteps" << std::endl;
-			break;
 		case '2':
-			// Set grass footstep surface
-			mCameraActor->SetFootstepSurface(0.5f);
-			std::cout << "Grass Footsteps" << std::endl;
+		case '3':
+		case '4':
+			ChangeCamera(key);
 			break;
+		case SDL_BUTTON_LEFT:
+		{
+			// Get start point (in center of screen on near plane)
+			Vector3 screenPoint(0.0f, 0.0f, 0.0f);
+			Vector3 start = mRenderer->Unproject(screenPoint);
+			// Get end point (in center of screen, between near and far)
+			screenPoint.z = 0.9f;
+			Vector3 end = mRenderer->Unproject(screenPoint);
+			// Set spheres to points
+			mStartSphere->SetPosition(start);
+			mEndSphere->SetPosition(end);
+			break;
+		}
 		default:
 			break;
 	}
@@ -326,6 +343,32 @@ void Game::LoadData()
 
 	//Music
 	mMusicEvent = mAudioSystem->PlayEvent("event:/Music");
+
+	// Enable relative mouse mode for camera look
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+	// Make an initial call to get relative to clear out
+	SDL_GetRelativeMouseState(nullptr, nullptr);
+
+	// Different camera actors
+	mFPSActor = new FPSActor(this);
+	mFollowActor = new FollowActor(this);
+	mOrbitActor = new OrbitActor(this);
+	mSplineActor = new SplineActor(this);
+
+	ChangeCamera('1');
+
+	//// Spheres for demonstrating unprojection
+	//mStartSphere = new Actor(this);
+	//mStartSphere->SetPosition(Vector3(10000.0f, 0.0f, 0.0f));
+	//mStartSphere->SetScale(0.25f);
+	//mc = new MeshComponent(mStartSphere);
+	//mc->SetMesh(mRenderer->GetMesh("Assets/Sphere.gpmesh"));
+	//mEndSphere = new Actor(this);
+	//mEndSphere->SetPosition(Vector3(10000.0f, 0.0f, 0.0f));
+	//mEndSphere->SetScale(0.25f);
+	//mc = new MeshComponent(mEndSphere);
+	//mc->SetMesh(mRenderer->GetMesh("Assets/Sphere.gpmesh"));
+	//mc->SetTextureIndex(1);
 }
 
 void Game::UnloadData()
@@ -389,5 +432,41 @@ void Game::RemoveActor(Actor* actor)
 		// Swap to end of vector and pop off (avoid erase copies)
 		std::iter_swap(iter, mActors.end() - 1);
 		mActors.pop_back();
+	}
+}
+
+void Game::ChangeCamera(int mode)
+{
+	// Disable everything
+	mFPSActor->SetState(Actor::EPaused);
+	mFPSActor->SetVisible(false);
+	mCrosshair->SetVisible(false);
+	mFollowActor->SetState(Actor::EPaused);
+	mFollowActor->SetVisible(false);
+	mOrbitActor->SetState(Actor::EPaused);
+	mOrbitActor->SetVisible(false);
+	mSplineActor->SetState(Actor::EPaused);
+
+	// Enable the camera specified by the mode
+	switch (mode)
+	{
+	case '1':
+	default:
+		mFPSActor->SetState(Actor::EActive);
+		mFPSActor->SetVisible(true);
+		mCrosshair->SetVisible(true);
+		break;
+	case '2':
+		mFollowActor->SetState(Actor::EActive);
+		mFollowActor->SetVisible(true);
+		break;
+	case '3':
+		mOrbitActor->SetState(Actor::EActive);
+		mOrbitActor->SetVisible(true);
+		break;
+	case '4':
+		mSplineActor->SetState(Actor::EActive);
+		mSplineActor->RestartSpline();
+		break;
 	}
 }

@@ -20,4 +20,6 @@ private:
 	float mAngularSpeed;
 	//Forward vector movement (units/second)
 	float mForwardSpeed;
+
+	float mStrafeSpeed;
 };

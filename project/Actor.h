@@ -39,6 +39,9 @@ public:
 	void ComputeWorldTransform();
 	const Matrix4& GetWorldTransform() const { return mWorldTransform; }
 
+
+	//Movement
+	Vector3 GetRight() const { return Vector3::Transform(Vector3::UnitY, mRotation); }
 	Vector3 GetForward() const { return Vector3::Transform(Vector3::UnitX, mRotation); }
 
 	State GetState() const { return mState; }

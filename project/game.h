@@ -47,6 +47,16 @@ class Game
 		// Game-specific code
 		class CameraActor* mCameraActor;
 
+		// Game-specific code
+		class FPSActor* mFPSActor;
+		class FollowActor* mFollowActor;
+		class OrbitActor* mOrbitActor;
+		class SplineActor* mSplineActor;
+		class Actor* mStartSphere;
+		class Actor* mEndSphere;
+		class SpriteComponent* mCrosshair;
+		void ChangeCamera(int mode);
+
 		//Sound Events
 		SoundEvent mMusicEvent;
 		SoundEvent mReverbSnap;
