@@ -44,6 +44,9 @@ public:
 	Vector3 GetRight() const { return Vector3::Transform(Vector3::UnitY, mRotation); }
 	Vector3 GetForward() const { return Vector3::Transform(Vector3::UnitX, mRotation); }
 
+	void RotateToNewForward(const Vector3& forward);
+
+	//States
 	State GetState() const { return mState; }
 	void SetState(State state) { mState = state; }
 

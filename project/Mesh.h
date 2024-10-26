@@ -1,13 +1,14 @@
 #pragma once
 #include <vector>
 #include <string>
+#include "Collision.h"
 
 class Mesh
 {
 public:
 	Mesh();
 	~Mesh();
-	// Load/unload mesh
+
 	bool Load(const std::string& fileName, class Renderer* renderer);
 	void Unload();
 	// Get the vertex array associated with this mesh
@@ -20,7 +21,11 @@ public:
 	float GetRadius() const { return mRadius; }
 	// Get specular power of mesh
 	float GetSpecPower() const { return mSpecPower; }
+	// Get object space bounding box
+	const AABB& GetBox() const { return mBox; }
 private:
+	// AABB collision
+	AABB mBox;
 	// Textures associated with this mesh
 	std::vector<class Texture*> mTextures;
 	// Vertex array associated with this mesh

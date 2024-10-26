@@ -10,13 +10,18 @@ public:
 	void UpdateActor(float deltaTime) override;
 	void ActorInput(const uint8_t* keys) override;
 
+	void Shoot();
+
 	void SetFootstepSurface(float value);
 
 	void SetVisible(bool visible);
+
+	void FixCollisions();
 private:
 	class MoveComponent* mMoveComp;
 	class AudioComponent* mAudioComp;
 	class MeshComponent* mMeshComp;
+	class BoxComponent* mBoxComp;
 	class FPSCamera* mCameraComp;
 	class Actor* mFPSModel;
 	SoundEvent mFootstep;
