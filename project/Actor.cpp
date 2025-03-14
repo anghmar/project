@@ -2,14 +2,14 @@
 #include "Game.h"
 #include "Component.h"
 #include <algorithm>
-#include "Math.h"
 
 Actor::Actor(Game* game)
 	:mState(EActive)
-	, mPosition(Vector2::Zero)
+	, mPosition(Vector3::Zero)
+	, mRotation(Quaternion::Identity)
 	, mScale(1.0f)
-	, mRotation(0.0f)
 	, mGame(game)
+	, mRecomputeWorldTransform(true)
 {
 	mGame->AddActor(this);
 }
@@ -29,8 +29,12 @@ void Actor::Update(float deltaTime)
 {
 	if (mState == EActive)
 	{
+		ComputeWorldTransform();
+
 		UpdateComponents(deltaTime);
 		UpdateActor(deltaTime);
+
+		ComputeWorldTransform();
 	}
 }
 
@@ -44,6 +48,66 @@ void Actor::UpdateComponents(float deltaTime)
 
 void Actor::UpdateActor(float deltaTime)
 {
+}
+
+void Actor::ProcessInput(const uint8_t* keyState)
+{
+	if (mState == EActive)
+	{
+		// First process input for components
+		for (auto comp : mComponents)
+		{
+			comp->ProcessInput(keyState);
+		}
+
+		ActorInput(keyState);
+	}
+}
+
+void Actor::ActorInput(const uint8_t* keyState)
+{
+}
+
+void Actor::ComputeWorldTransform()
+{
+	if (mRecomputeWorldTransform)
+	{
+		mRecomputeWorldTransform = false;
+		// Scale, then rotate, then translate
+		mWorldTransform = Matrix4::CreateScale(mScale);
+		mWorldTransform *= Matrix4::CreateFromQuaternion(mRotation);
+		mWorldTransform *= Matrix4::CreateTranslation(mPosition);
+
+		// Inform components world transform updated
+		for (auto comp : mComponents)
+		{
+			comp->OnUpdateWorldTransform();
+		}
+	}
+}
+
+void Actor::RotateToNewForward(const Vector3& forward)
+{
+	// Figure out difference between original (unit x) and new
+	float dot = Vector3::Dot(Vector3::UnitX, forward);
+	float angle = Math::Acos(dot);
+	// Facing down X
+	if (dot > 0.9999f)
+	{
+		SetRotation(Quaternion::Identity);
+	}
+	// Facing down -X
+	else if (dot < -0.9999f)
+	{
+		SetRotation(Quaternion(Vector3::UnitZ, Math::Pi));
+	}
+	else
+	{
+		// Rotate about axis from cross product
+		Vector3 axis = Vector3::Cross(Vector3::UnitX, forward);
+		axis.Normalize();
+		SetRotation(Quaternion(axis, angle));
+	}
 }
 
 void Actor::AddComponent(Component* component)

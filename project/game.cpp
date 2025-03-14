@@ -1,16 +1,29 @@
 #include "Game.h"
-#include "SDL_image.h"
 #include <algorithm>
+#include <iostream>
+#include "Renderer.h"
 #include "Actor.h"
 #include "SpriteComponent.h"
-#include "Ship.h"
-#include "BGSpriteComponent.h"
-#include <SDL_image.h>
-#include <iostream>
+#include "MeshComponent.h"
+//#include "CameraActor.h"
+#include "PlaneActor.h"
+#include "AudioSystem.h"
+//#include "SoundEvent.h"
+#include "Texture.h"
+#include "Mesh.h"
+#include "AudioComponent.h"
+#include "FPSActor.h"
+#include "FollowActor.h"
+#include "OrbitActor.h"
+#include "SplineActor.h"
+#include "PhysWorld.h"
+#include "TargetActor.h"
+#include "BallActor.h"
 
 Game::Game()
-	:mWindow(nullptr)
-	, mRenderer(nullptr)
+	:mRenderer(nullptr)
+	, mAudioSystem(nullptr)
+	, mPhysWorld(nullptr)
 	, mIsRunning(true)
 	, mUpdatingActors(false)
 {
@@ -19,31 +32,35 @@ Game::Game()
 
 bool Game::Initialize()
 {
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER) != 0)
 	{
 		SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
 		return false;
 	}
 
-	mWindow = SDL_CreateWindow("Game Programming in C++ (Chapter 2)", 100, 100, 1024, 768, 0);
-	if (!mWindow)
+	//Create the renderer
+	mRenderer = new Renderer(this);
+	if (!mRenderer->Initialize(1024.0f, 768.0f))
 	{
-		SDL_Log("Failed to create window: %s", SDL_GetError());
+		SDL_Log("Failed to initialize renderer");
+		delete mRenderer;
+		mRenderer = nullptr;
 		return false;
 	}
 
-	mRenderer = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if (!mRenderer)
+	//Create the audio system
+	mAudioSystem = new AudioSystem(this);
+	if (!mAudioSystem->Initialize())
 	{
-		SDL_Log("Failed to create renderer: %s", SDL_GetError());
+		SDL_Log("Failed to initialize AudioSystem");
+		mAudioSystem->Shutdown();
+		delete mAudioSystem;
+		mAudioSystem = nullptr;
 		return false;
 	}
 
-	if (IMG_Init(IMG_INIT_PNG) == 0)
-	{
-		SDL_Log("Unable to initialize SDL_image: %s", SDL_GetError());
-		return false;
-	}
+	// Create the physics world
+	mPhysWorld = new PhysWorld(this);
 
 	LoadData();
 
@@ -51,8 +68,6 @@ bool Game::Initialize()
 
 	return true;
 }
-
-
 
 void Game::RunLoop()
 {
@@ -64,6 +79,17 @@ void Game::RunLoop()
 	}
 }
 
+void Game::AddPlane(PlaneActor* plane)
+{
+	mPlanes.emplace_back(plane);
+}
+
+void Game::RemovePlane(PlaneActor* plane)
+{
+	auto iter = std::find(mPlanes.begin(), mPlanes.end(), plane);
+	mPlanes.erase(iter);
+}
+
 void Game::ProcessInput()
 {
 	SDL_Event event;
@@ -71,9 +97,21 @@ void Game::ProcessInput()
 	{
 		switch (event.type)
 		{
-		case SDL_QUIT:
-			mIsRunning = false;
-			break;
+			case SDL_QUIT:
+				mIsRunning = false;
+				break;
+				// This fires when a key's initially pressed
+			case SDL_KEYDOWN:
+				if (!event.key.repeat)
+				{
+					HandleKeyPress(event.key.keysym.sym);
+				}
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				HandleKeyPress(event.button.button);
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -83,16 +121,77 @@ void Game::ProcessInput()
 		mIsRunning = false;
 	}
 
-	// Process ship input
-	mShip->ProcessKeyboard(state);
+	for (auto actor : mActors)
+	{
+		actor->ProcessInput(state);
+	}
+}
+
+void Game::HandleKeyPress(int key)
+{
+	switch (key)
+	{
+		case '-':
+		{
+			// Reduce master volume
+			float volume = mAudioSystem->GetBusVolume("bus:/");
+			volume = Math::Max(0.0f, volume - 0.1f);
+			mAudioSystem->SetBusVolume("bus:/", volume);
+			std::cout << "Lowering MV" << std::endl;
+			break;
+		}
+		case '=':
+		{
+			// Increase master volume
+			float volume = mAudioSystem->GetBusVolume("bus:/");
+			volume = Math::Min(1.0f, volume + 0.1f);
+			mAudioSystem->SetBusVolume("bus:/", volume);
+			std::cout << "Increasing MV" << std::endl;
+			break;
+		}
+		case 'm':
+		{
+			// Toggle music pause state
+			mMusicEvent.SetPaused(!mMusicEvent.GetPaused());
+			std::cout << "Pausing Music" << std::endl;
+			break;
+		}
+		case 'r':
+		{
+			// Stop or start reverb snapshot
+			if (!mReverbSnap.IsValid())
+			{
+				mReverbSnap = mAudioSystem->PlayEvent("snapshot:/WithReverb");
+				std::cout << "Reverb" << std::endl;
+			}
+			else
+			{
+				mReverbSnap.Stop();
+			}
+			break;
+		}
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+			ChangeCamera(key);
+			break;
+		case SDL_BUTTON_LEFT:
+		{
+			// Fire weapon
+			mFPSActor->Shoot();
+			break;
+		}
+		default:
+			break;
+	}
 }
 
 void Game::UpdateGame()
 {
 	// Compute delta time
 	// Wait until 16ms has elapsed since last frame
-	while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16))
-		;
+	while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16));
 
 	float deltaTime = (SDL_GetTicks() - mTicksCount) / 1000.0f;
 	if (deltaTime > 0.05f)
@@ -104,7 +203,7 @@ void Game::UpdateGame()
 	// Update all actors
 	mUpdatingActors = true;
 	for (auto actor : mActors)
-	{
+	{ 
 		actor->Update(deltaTime);
 	}
 	mUpdatingActors = false;
@@ -112,6 +211,7 @@ void Game::UpdateGame()
 	// Move any pending actors to mActors
 	for (auto pending : mPendingActors)
 	{
+		pending->ComputeWorldTransform();
 		mActors.emplace_back(pending);
 	}
 	mPendingActors.clear();
@@ -131,52 +231,105 @@ void Game::UpdateGame()
 	{
 		delete actor;
 	}
+
+	//mAudioSystem->PlayEvent("event:/Music");
+	mAudioSystem->Update(deltaTime);
 }
 
 void Game::GenerateOutput()
 {
-	SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
-	SDL_RenderClear(mRenderer);
-
-	// Draw all sprite components
-	for (auto sprite : mSprites)
-	{
-		sprite->Draw(mRenderer);
-	}
-
-	SDL_RenderPresent(mRenderer);
+	mRenderer->Draw();
 }
 
 void Game::LoadData()
 {
-	// Create player's ship
-	mShip = new Ship(this);
-	mShip->SetPosition(Vector2(100.0f, 384.0f));
-	mShip->SetScale(2.0f);
+	// Create actors
+	Actor* a = nullptr;
+	Quaternion q;
+	//MeshComponent* mc = nullptr;
 
-	// Create actor for the background (this doesn't need a subclass)
-	Actor* temp = new Actor(this);
-	temp->SetPosition(Vector2(512.0f, 384.0f));
-	// Create the "far back" background
-	BGSpriteComponent* bg = new BGSpriteComponent(temp);
-	bg->SetScreenSize(Vector2(1024.0f, 768.0f));
-	std::vector<SDL_Texture*> bgtexs = {
-		GetTexture("Assets/Farback01.png"),
-		GetTexture("Assets/Farback02.png")
-	};
-	bg->SetBGTextures(bgtexs);
-	bg->SetScrollSpeed(-100.0f);
-	// Create the closer background
-	bg = new BGSpriteComponent(temp, 50);
-	bg->SetScreenSize(Vector2(1024.0f, 768.0f));
-	bgtexs = {
-		GetTexture("Assets/Stars.png"),
-		GetTexture("Assets/Stars.png")
-	};
-	bg->SetBGTextures(bgtexs);
-	bg->SetScrollSpeed(5.0f);
+	// Setup floor
+	const float start = -1250.0f;
+	const float size = 250.0f;
+	for (int i = 0; i < 10; i++)
+	{
+		for (int j = 0; j < 10; j++)
+		{
+			a = new PlaneActor(this);
+			a->SetPosition(Vector3(start + i * size, start + j * size, -100.0f));
+		}
+	}
 
-	std::cout << mShip->GetRightSpeed() << std::endl;
+	// Left/right walls
+	q = Quaternion(Vector3::UnitX, Math::PiOver2);
+	for (int i = 0; i < 10; i++)
+	{
+		a = new PlaneActor(this);
+		a->SetPosition(Vector3(start + i * size, start - size, 0.0f));
+		a->SetRotation(q);
+
+		a = new PlaneActor(this);
+		a->SetPosition(Vector3(start + i * size, -start + size, 0.0f));
+		a->SetRotation(q);
+	}
+
+	q = Quaternion::Concatenate(q, Quaternion(Vector3::UnitZ, Math::PiOver2));
+	// Forward/back walls
+	for (int i = 0; i < 10; i++)
+	{
+		a = new PlaneActor(this);
+		a->SetPosition(Vector3(start - size, start + i * size, 0.0f));
+		a->SetRotation(q);
+
+		a = new PlaneActor(this);
+		a->SetPosition(Vector3(-start + size, start + i * size, 0.0f));
+		a->SetRotation(q);
+	}
+
+	// Setup lights
+	mRenderer->SetAmbientLight(Vector3(0.2f, 0.2f, 0.2f));
+	DirectionalLight& dir = mRenderer->GetDirectionalLight();
+	dir.mDirection = Vector3(0.0f, -0.707f, -0.707f);
+	dir.mDiffuseColor = Vector3(0.78f, 0.88f, 1.0f);
+	dir.mSpecColor = Vector3(0.8f, 0.8f, 0.8f);
+
+	// UI elements
+	a = new Actor(this);
+	a->SetPosition(Vector3(-350.0f, -350.0f, 0.0f));
+	SpriteComponent* sc = new SpriteComponent(a);
+	sc->SetTexture(mRenderer->GetTexture("Assets/HealthBar.png"));
+
+	a = new Actor(this);
+	a->SetPosition(Vector3(-390.0f, 275.0f, 0.0f));
+	a->SetScale(0.75f);
+	sc = new SpriteComponent(a);
+	sc->SetTexture(mRenderer->GetTexture("Assets/Radar.png"));
+
+	a = new Actor(this);
+	a->SetScale(2.0f);
+	mCrosshair = new SpriteComponent(a);
+	mCrosshair->SetTexture(mRenderer->GetTexture("Assets/Crosshair.png"));
+
+	// Start music
+	mMusicEvent = mAudioSystem->PlayEvent("event:/Music");
+
+	// Enable relative mouse mode for camera look
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+	// Make an initial call to get relative to clear out
+	SDL_GetRelativeMouseState(nullptr, nullptr);
+
+	// Different camera actors
+	mFPSActor = new FPSActor(this);
+
+	// Create target actors
+	a = new TargetActor(this);
+	a->SetPosition(Vector3(1450.0f, 0.0f, 100.0f));
+	a = new TargetActor(this);
+	a->SetPosition(Vector3(1450.0f, 0.0f, 400.0f));
+	a = new TargetActor(this);
+	a->SetPosition(Vector3(1450.0f, -500.0f, 200.0f));
+	a = new TargetActor(this);
+	a->SetPosition(Vector3(1450.0f, 500.0f, 200.0f));
 }
 
 void Game::UnloadData()
@@ -188,53 +341,25 @@ void Game::UnloadData()
 		delete mActors.back();
 	}
 
-	// Destroy textures
-	for (auto i : mTextures)
+	if (mRenderer)
 	{
-		SDL_DestroyTexture(i.second);
+		mRenderer->UnloadData();
 	}
-	mTextures.clear();
-}
-
-SDL_Texture* Game::GetTexture(const std::string& fileName)
-{
-	SDL_Texture* tex = nullptr;
-	// Is the texture already in the map?
-	auto iter = mTextures.find(fileName);
-	if (iter != mTextures.end())
-	{
-		tex = iter->second;
-	}
-	else
-	{
-		// Load from file
-		SDL_Surface* surf = IMG_Load(fileName.c_str());
-		if (!surf)
-		{
-			SDL_Log("Failed to load texture file %s", fileName.c_str());
-			return nullptr;
-		}
-
-		// Create texture from surface
-		tex = SDL_CreateTextureFromSurface(mRenderer, surf);
-		SDL_FreeSurface(surf);
-		if (!tex)
-		{
-			SDL_Log("Failed to convert surface to texture for %s", fileName.c_str());
-			return nullptr;
-		}
-
-		mTextures.emplace(fileName.c_str(), tex);
-	}
-	return tex;
 }
 
 void Game::Shutdown()
 {
 	UnloadData();
-	IMG_Quit();
-	SDL_DestroyRenderer(mRenderer);
-	SDL_DestroyWindow(mWindow);
+	delete mPhysWorld;
+	if (mRenderer)
+	{
+		mRenderer->Shutdown();
+	}
+
+	if (mAudioSystem)
+	{
+		mAudioSystem->Shutdown();
+	}
 	SDL_Quit();
 }
 
@@ -272,29 +397,42 @@ void Game::RemoveActor(Actor* actor)
 	}
 }
 
-void Game::AddSprite(SpriteComponent* sprite)
+void Game::ChangeCamera(int mode)
 {
-	// Find the insertion point in the sorted vector
-	// (The first element with a higher draw order than me)
-	int myDrawOrder = sprite->GetDrawOrder();
-	auto iter = mSprites.begin();
-	for (;
-		iter != mSprites.end();
-		++iter)
+	// Disable everything
+	mFPSActor->SetState(Actor::EPaused);
+	mFPSActor->SetVisible(false);
+
+	mCrosshair->SetVisible(false);
+
+	mFollowActor->SetState(Actor::EPaused);
+	mFollowActor->SetVisible(false);
+
+	mOrbitActor->SetState(Actor::EPaused);
+	mOrbitActor->SetVisible(false);
+
+	mSplineActor->SetState(Actor::EPaused);
+
+	// Enable the camera specified by the mode
+	switch (mode)
 	{
-		if (myDrawOrder < (*iter)->GetDrawOrder())
-		{
+		case '1':
+		default:
+			mFPSActor->SetState(Actor::EActive);
+			mFPSActor->SetVisible(true);
+			mCrosshair->SetVisible(true);
 			break;
-		}
+		case '2':
+			mFollowActor->SetState(Actor::EActive);
+			mFollowActor->SetVisible(true);
+			break;
+		case '3':
+			mOrbitActor->SetState(Actor::EActive);
+			mOrbitActor->SetVisible(true);
+			break;
+		case '4':
+			mSplineActor->SetState(Actor::EActive);
+			mSplineActor->RestartSpline();
+			break;
 	}
-
-	// Inserts element before position of iterator
-	mSprites.insert(iter, sprite);
-}
-
-void Game::RemoveSprite(SpriteComponent* sprite)
-{
-	// (We can't swap because it ruins ordering)
-	auto iter = std::find(mSprites.begin(), mSprites.end(), sprite);
-	mSprites.erase(iter);
 }

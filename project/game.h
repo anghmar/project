@@ -1,50 +1,67 @@
 #pragma once
-#include "SDL.h"
+#include <SDL.h>
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include "Math.h"
+#include "AudioSystem.h"
 
 class Game
 {
-public:
-	Game();
-	bool Initialize();
-	void RunLoop();
-	void Shutdown();
+	public:
+		Game();
+		bool Initialize();
+		void RunLoop();
+		void Shutdown();
 
-	void AddActor(class Actor* actor);
-	void RemoveActor(class Actor* actor);
+		void AddActor(class Actor* actor);
+		void RemoveActor(class Actor* actor);
 
-	void AddSprite(class SpriteComponent* sprite);
-	void RemoveSprite(class SpriteComponent* sprite);
+		class Renderer* GetRenderer() { return mRenderer; }
+		class AudioSystem* GetAudioSystem() { return mAudioSystem; }
+		class PhysWorld* GetPhysWorld() { return mPhysWorld; }
 
-	SDL_Texture* GetTexture(const std::string& fileName);
-private:
-	void ProcessInput();
-	void UpdateGame();
-	void GenerateOutput();
-	void LoadData();
-	void UnloadData();
+		// Game-specific
+		void AddPlane(class PlaneActor* plane);
+		void RemovePlane(class PlaneActor* plane);
+		std::vector<class PlaneActor*>& GetPlanes() { return mPlanes; }
+	private:
+		void ProcessInput();
+		void HandleKeyPress(int key);
+		void UpdateGame();
+		void GenerateOutput();
+		void LoadData();
+		void UnloadData();
 
-	// Map of textures loaded
-	std::unordered_map<std::string, SDL_Texture*> mTextures;
+		// All the actors in the game
+		std::vector<class Actor*> mActors;
+		// Any pending actors
+		std::vector<class Actor*> mPendingActors;
 
-	// All the actors in the game
-	std::vector<class Actor*> mActors;
-	// Any pending actors
-	std::vector<class Actor*> mPendingActors;
+		class Renderer* mRenderer;
+		class AudioSystem* mAudioSystem;
+		class PhysWorld* mPhysWorld;
 
-	// All the sprite components drawn
-	std::vector<class SpriteComponent*> mSprites;
+		Uint32 mTicksCount;
+		bool mIsRunning;
+		// Track if we're updating actors right now
+		bool mUpdatingActors;
 
-	SDL_Window* mWindow;
-	SDL_Renderer* mRenderer;
-	Uint32 mTicksCount;
-	bool mIsRunning;
-	// Track if we're updating actors right now
-	bool mUpdatingActors;
+		// Game-specific code
+		std::vector<class PlaneActor*> mPlanes;
+		class CameraActor* mCameraActor;
 
-	// Game-specific Game-specific Game-specific Game-specific Game-specific
-	 
-	class Ship* mShip; // Player's ship
+		// Game-specific code
+		class FPSActor* mFPSActor;
+		class FollowActor* mFollowActor;
+		class OrbitActor* mOrbitActor;
+		class SplineActor* mSplineActor;
+		class Actor* mStartSphere;
+		class Actor* mEndSphere;
+		class SpriteComponent* mCrosshair;
+		void ChangeCamera(int mode);
+
+		//Sound Events
+		SoundEvent mMusicEvent;
+		SoundEvent mReverbSnap;
 };

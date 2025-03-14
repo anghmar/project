@@ -1,5 +1,6 @@
 #include "AnimSpriteComponent.h"
 #include "Math.h"
+#include <iostream>
 
 AnimSpriteComponent::AnimSpriteComponent(Actor* owner, int drawOrder)
 	:SpriteComponent(owner, drawOrder),
@@ -14,7 +15,7 @@ AnimSpriteComponent::AnimSpriteComponent(Actor* owner, int drawOrder)
 
 void AnimSpriteComponent::Update(float deltaTime)
 {
-	//SpriteComponent::Update(deltaTime);
+	SpriteComponent::Update(deltaTime);
 
 	//if (mIsPlaying && !mAnimations.empty())
 	//{
@@ -43,23 +44,23 @@ void AnimSpriteComponent::Update(float deltaTime)
 	//	SetTexture(currentAnimation.textures[static_cast<int>(mCurrFrame)]);
 	//}
 
-	//if (mAnimTextures.size() > 0)
-	//{
-	//	//Update the current frame based on frame rate and delta time
-	//	mCurrFrame += mAnimFPS * deltaTime;
+	if (mAnimTextures.size() > 0)
+	{
+		//Update the current frame based on frame rate and delta time
+		mCurrFrame += mAnimFPS * deltaTime;
 
-	//	//Wrap current frame if needed
-	//	while (mCurrFrame >= mAnimTextures.size())
-	//	{
-	//		mCurrFrame -= mAnimTextures.size();
-	//	}
+		//Wrap current frame if needed
+		while (mCurrFrame >= mAnimTextures.size())
+		{
+			mCurrFrame -= mAnimTextures.size();
+		}
 
-	//	//Set the current texture
-	//	SetTexture(mAnimTextures[static_cast<int>(mCurrFrame)]);
-	//}
+		//Set the current texture
+		SetTexture(mAnimTextures[static_cast<int>(mCurrFrame)]);
+	}
 }
 
-void AnimSpriteComponent::SetAnimTextures(const std::vector<SDL_Texture*>& textures)
+void AnimSpriteComponent::SetAnimTextures(const std::vector<Texture*>& textures)
 {
 	mAnimTextures = textures;
 	if (mAnimTextures.size() > 0)
@@ -99,4 +100,17 @@ void AnimSpriteComponent::SetCurrentAnimationManual(int frameIndex, int animatio
 	mCurrFrame = 0.0f;
 	mIsPlaying = true;
 	SetTexture(mAnimations[animationIndex].textures[frameIndex]);
+}
+
+void AnimSpriteComponent::SetCurrentAnimationLoop(AnimSpriteComponent* sprite, int animationIndex, int endIndex)
+{
+	mCurrFrame = 0.0f;
+	mIsPlaying = true;
+	for (int i = 0; i < endIndex; i++)
+	{
+		
+		SetTexture(mAnimations[animationIndex].textures[i]);
+		std::cout << i << std::endl;
+	}
+	sprite->SetLockControl(true);
 }

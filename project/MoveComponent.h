@@ -1,5 +1,5 @@
+#pragma once
 #include "Component.h"
-#include "Math.h"
 
 class MoveComponent : public Component
 {
@@ -11,13 +11,15 @@ public:
 
 	float GetAngularSpeed() const { return mAngularSpeed; }
 	float GetForwardSpeed() const { return mForwardSpeed; }
-	
+	float GetStrafeSpeed() const { return mStrafeSpeed; }
+
 	void SetAngularSpeed(float speed) { mAngularSpeed = speed; }
 	void SetForwardSpeed(float speed) { mForwardSpeed = speed; }
+	void SetStrafeSpeed(float speed) { mStrafeSpeed = speed; }
 
 private:
 	//Rotation in radians/speed
 	float mAngularSpeed;
-	//Forward vector movement (units/second)
 	float mForwardSpeed;
+	float mStrafeSpeed;
 };
