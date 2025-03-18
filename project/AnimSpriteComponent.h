@@ -32,7 +32,7 @@ public:
 
 private:
 	//All textures in the animation
-	std::vector<SDL_Texture*> mAnimTextures; //it will probably get deleted..
+	std::vector<SDL_Texture*> mAnimTextures; //it will probably get deleted soon..
 
 	std::vector<Animation> mAnimations;
 	//Animation& currentAnimation;
